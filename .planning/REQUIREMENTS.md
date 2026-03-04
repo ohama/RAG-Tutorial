@@ -62,26 +62,26 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ENV-01 | - | Pending |
-| ENV-02 | - | Pending |
-| ENV-03 | - | Pending |
-| DOC-01 | - | Pending |
-| DOC-02 | - | Pending |
-| DOC-03 | - | Pending |
-| DOC-04 | - | Pending |
-| RET-01 | - | Pending |
-| RET-02 | - | Pending |
-| RET-03 | - | Pending |
-| RET-04 | - | Pending |
-| TUT-01 | - | Pending |
-| TUT-02 | - | Pending |
-| TUT-03 | - | Pending |
+| ENV-01 | Phase 1 | Pending |
+| ENV-02 | Phase 1 | Pending |
+| ENV-03 | Phase 1 | Pending |
+| DOC-01 | Phase 2 | Pending |
+| DOC-02 | Phase 2 | Pending |
+| DOC-03 | Phase 2 | Pending |
+| DOC-04 | Phase 2 | Pending |
+| RET-01 | Phase 3 | Pending |
+| RET-02 | Phase 3 | Pending |
+| RET-03 | Phase 3 | Pending |
+| RET-04 | Phase 3 | Pending |
+| TUT-01 | Phase 3 | Pending |
+| TUT-02 | Phase 3 | Pending |
+| TUT-03 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 14 total
-- Mapped to phases: 0
-- Unmapped: 14 ⚠️
+- Mapped to phases: 14
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-04*
-*Last updated: 2026-03-04 after initial definition*
+*Last updated: 2026-03-04 after roadmap creation — all requirements mapped*
