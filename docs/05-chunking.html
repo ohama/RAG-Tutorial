@@ -1,0 +1,514 @@
+<!DOCTYPE HTML>
+<html lang="ko" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>05. 텍스트 자르기 (Chunking) - RAG Tutorial</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Mac Studio에서 Qwen3.5 MLX로 배우는 로컬 RAG 튜토리얼">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="favicon-8114d1fc.png">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-2459343d.css">
+        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex-b722dc80.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc-f39401bd.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">RAG Tutorial</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="05-텍스트-자르기-chunking"><a class="header" href="#05-텍스트-자르기-chunking">05. 텍스트 자르기 (Chunking)</a></h1>
+<h2 id="이-단계의-위치"><a class="header" href="#이-단계의-위치">이 단계의 위치</a></h2>
+<pre><code>                ★ 여기!
+ ① 로딩        ② 청킹          ③ 임베딩         ④ 저장
+┌──────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│ 문서  │ →  │ 텍스트    │ →  │ 벡터     │ →  │ 벡터 DB  │
+│ 파일  │    │ 조각들    │    │ 변환     │    │ 저장     │
+└──────┘    └──────────┘    └──────────┘    └──────────┘
+</code></pre>
+<h2 id="왜-자르는가"><a class="header" href="#왜-자르는가">왜 자르는가?</a></h2>
+<p>도서관 비유로 돌아갑시다.</p>
+<p>학생이 “통합 메모리란?” 이라고 물었을 때, 사서가 어떻게 해야 할까요?</p>
+<p><strong>방법 A</strong>: 책 한 권을 통째로 건네준다</p>
+<ul>
+<li>학생: “이 300페이지 중에서 어디를 봐야 하나요…?”</li>
+<li>시간 낭비, 관련 없는 내용이 대부분</li>
+</ul>
+<p><strong>방법 B</strong>: 관련된 3페이지만 펼쳐준다</p>
+<ul>
+<li>학생: “아, 여기에 딱 나와있네요!”</li>
+<li>정확하고 빠름</li>
+</ul>
+<p>RAG도 마찬가지입니다. 문서 전체를 LLM에 넣는 것은 비효율적입니다:</p>
+<ol>
+<li><strong>LLM 한계</strong> — LLM은 한 번에 처리할 수 있는 텍스트 양이 제한됩니다 (컨텍스트 윈도우)</li>
+<li><strong>검색 정밀도</strong> — 작은 조각이 큰 문서보다 더 정확하게 “관련 있음/없음“을 판별할 수 있습니다</li>
+<li><strong>비용</strong> — 보내는 텍스트가 많을수록 처리 시간과 메모리가 더 듭니다</li>
+</ol>
+<p>그래서 문서를 **적당한 크기의 조각(chunk)**으로 나눕니다.</p>
+<h2 id="종이를-자르는-것처럼"><a class="header" href="#종이를-자르는-것처럼">종이를 자르는 것처럼</a></h2>
+<p>10장짜리 문서를 500자씩 자른다고 생각해보세요.</p>
+<pre><code>전체 문서 (5000자):
+
+"RAG는 검색 증강 생성입니다. ← ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐
+LLM이 답변을 생성할 때,                                   │
+외부 문서에서 관련 정보를                                  │ 조각 1
+먼저 검색한 뒤 그 정보를                                  │ (500자)
+바탕으로 답변합니다..." ← ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
+
+"임베딩은 텍스트를 벡터로 ← ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐
+변환하는 과정입니다.                                      │
+의미가 비슷한 텍스트는                                    │ 조각 2
+비슷한 벡터를 가집니다.                                   │ (500자)
+이 성질 덕분에..." ← ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
+
+...
+</code></pre>
+<h2 id="두-가지-핵심-파라미터"><a class="header" href="#두-가지-핵심-파라미터">두 가지 핵심 파라미터</a></h2>
+<h3 id="chunk_size-조각의-크기"><a class="header" href="#chunk_size-조각의-크기">chunk_size: 조각의 크기</a></h3>
+<p>한 조각의 최대 글자 수입니다.</p>
+<pre><code>chunk_size = 100:  짧은 조각 → 많은 조각 개수
+chunk_size = 500:  적당한 조각 ★ 권장
+chunk_size = 2000: 긴 조각 → 적은 조각 개수
+</code></pre>
+<h3 id="chunk_overlap-겹침-영역"><a class="header" href="#chunk_overlap-겹침-영역">chunk_overlap: 겹침 영역</a></h3>
+<p>인접한 두 조각이 일부 내용을 공유하도록 합니다.</p>
+<p><strong>왜 겹쳐야 하는가?</strong> 문장이 두 조각의 경계에 걸쳐서 잘리면, 의미가 손실됩니다.</p>
+<pre><code>겹침 없이 자르면 (overlap = 0):
+
+조각 1: "...Apple Silicon의 통합 메모"
+조각 2: "리는 CPU와 GPU가 공유합니다..."
+
+→ "통합 메모리"가 두 조각으로 나뉘었습니다!
+  조각 1에서 검색하면 불완전한 정보
+  조각 2에서 검색하면 맥락이 없음
+</code></pre>
+<pre><code>겹침 있게 자르면 (overlap = 50):
+
+조각 1: "...Apple Silicon의 통합 메모리는 CPU와 GPU가"
+                                    ↕ 겹침 영역 (50자)
+조각 2: "통합 메모리는 CPU와 GPU가 공유합니다. 이는..."
+
+→ "통합 메모리"가 양쪽 조각에 모두 포함됩니다!
+  어느 조각을 검색해도 완전한 정보를 얻을 수 있습니다
+</code></pre>
+<h2 id="코드로-구현하기"><a class="header" href="#코드로-구현하기">코드로 구현하기</a></h2>
+<p><code>langchain-text-splitters</code> 패키지를 사용합니다. LangChain 프레임워크 전체가 아니라, 텍스트 분할 기능만 독립적으로 사용합니다.</p>
+<pre><code class="language-python">from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+def chunk_text(
+    text: str,
+    chunk_size: int = 500,
+    chunk_overlap: int = 50,
+) -&gt; list[str]:
+    """Split text into overlapping chunks.
+
+    Uses RecursiveCharacterTextSplitter which tries to split
+    at natural boundaries (paragraphs &gt; lines &gt; sentences &gt; words).
+    """
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        separators=["\n\n", "\n", ". ", " ", ""],
+    )
+
+    chunks = splitter.split_text(text)
+    return chunks
+</code></pre>
+<h3 id="recursivecharactertextsplitter가-하는-일"><a class="header" href="#recursivecharactertextsplitter가-하는-일">RecursiveCharacterTextSplitter가 하는 일</a></h3>
+<p>이 splitter는 텍스트를 <strong>가능한 한 자연스러운 경계</strong>에서 자릅니다.</p>
+<p><code>separators</code> 리스트의 순서대로 시도합니다:</p>
+<pre><code>1차 시도: "\n\n" (빈 줄) → 문단 단위로 나누기
+   조각이 chunk_size 이하면 OK!
+   아직 크면 ↓
+
+2차 시도: "\n" (줄바꿈) → 줄 단위로 나누기
+   조각이 chunk_size 이하면 OK!
+   아직 크면 ↓
+
+3차 시도: ". " (마침표+공백) → 문장 단위로 나누기
+   조각이 chunk_size 이하면 OK!
+   아직 크면 ↓
+
+4차 시도: " " (공백) → 단어 단위로 나누기
+   최후의 수단
+</code></pre>
+<p>예시:</p>
+<pre><code class="language-python">text = """첫 번째 문단입니다. 이 문단은 짧습니다.
+
+두 번째 문단입니다. 이 문단은 조금 더 길어서 여러 문장을 포함합니다.
+중요한 내용이 여기에 있습니다. 그리고 더 많은 설명이 이어집니다.
+
+세 번째 문단입니다."""
+
+chunks = chunk_text(text, chunk_size=100, chunk_overlap=20)
+for i, chunk in enumerate(chunks):
+    print(f"[Chunk {i}] ({len(chunk)} chars): {chunk}")
+</code></pre>
+<h2 id="메타데이터-보존"><a class="header" href="#메타데이터-보존">메타데이터 보존</a></h2>
+<p>조각을 만들 때 <strong>이 조각이 어디서 왔는지</strong> 정보를 함께 저장해야 합니다.</p>
+<pre><code class="language-python">def chunk_document(
+    doc: dict,
+    chunk_size: int = 500,
+    chunk_overlap: int = 50,
+) -&gt; list[dict]:
+    """Chunk a document and preserve source metadata.
+
+    Each chunk carries:
+    - The original document's metadata (source filename, format)
+    - Its own position info (chunk_index, chunk_total)
+    """
+    text_chunks = chunk_text(doc["text"], chunk_size, chunk_overlap)
+
+    chunks = []
+    for i, text in enumerate(text_chunks):
+        chunks.append({
+            "text": text,
+            "metadata": {
+                **doc["metadata"],            # source, format, title...
+                "chunk_index": i,             # 이 조각의 순서
+                "chunk_total": len(text_chunks),  # 전체 조각 수
+            }
+        })
+
+    return chunks
+</code></pre>
+<p>나중에 RAG 답변에서 이렇게 사용됩니다:</p>
+<pre><code>답변: "Apple Silicon의 통합 메모리는 CPU와 GPU가 같은 메모리를 공유합니다."
+출처: mlx-guide.md, chunk 3/8
+</code></pre>
+<h2 id="chunk_size-선택-가이드"><a class="header" href="#chunk_size-선택-가이드">chunk_size 선택 가이드</a></h2>
+<p>어떤 크기가 좋을까요? 상황마다 다르지만, 직관적으로 이해할 수 있습니다:</p>
+<h3 id="너무-작으면-chunk_size--100"><a class="header" href="#너무-작으면-chunk_size--100">너무 작으면 (chunk_size = 100)</a></h3>
+<pre><code>조각: "통합 메모리는 CPU와 GPU가 같은 메모리를 공유합니다."
+
+→ 이것만 보면: 무엇의 통합 메모리? 어떤 맥락?
+→ 검색은 잘 되지만, LLM에게 주기엔 맥락이 부족
+</code></pre>
+<h3 id="너무-크면-chunk_size--2000"><a class="header" href="#너무-크면-chunk_size--2000">너무 크면 (chunk_size = 2000)</a></h3>
+<pre><code>조각: "MLX 소개... [500자] ...통합 메모리 설명... [500자]
+       ...설치 방법... [500자] ...코드 예제... [500자]"
+
+→ 모든 내용이 다 들어있지만, "통합 메모리"를 물어봤는데
+   설치 방법, 코드 예제까지 딸려옴
+→ 검색 정밀도가 떨어짐
+</code></pre>
+<h3 id="적당하면-chunk_size--500"><a class="header" href="#적당하면-chunk_size--500">적당하면 (chunk_size = 500)</a></h3>
+<pre><code>조각: "MLX의 핵심 특징은 통합 메모리입니다.
+       Apple Silicon은 CPU와 GPU가 같은 메모리를 공유합니다.
+       일반 시스템에서는 데이터를 복사해야 하지만,
+       Apple Silicon에서는 이 복사가 필요 없어 대규모 모델
+       실행에 유리합니다."
+
+→ 충분한 맥락 + 집중된 내용
+→ 검색도 잘 되고, LLM이 이해하기도 좋음
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>chunk_size</th><th>장점</th><th>단점</th><th>적합한 경우</th></tr>
+</thead>
+<tbody>
+<tr><td>100-200</td><td>정밀한 검색</td><td>맥락 부족</td><td>짧은 FAQ</td></tr>
+<tr><td>400-600</td><td>균형</td><td>-</td><td><strong>대부분의 경우 (권장)</strong></td></tr>
+<tr><td>1000-2000</td><td>풍부한 맥락</td><td>검색 정밀도 낮음</td><td>긴 논문</td></tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p><strong>시작은 500으로.</strong> 결과를 보면서 조정하세요.</p>
+</blockquote>
+<h2 id="한국어-청킹-주의사항"><a class="header" href="#한국어-청킹-주의사항">한국어 청킹 주의사항</a></h2>
+<p>한국어는 영어와 특성이 다릅니다:</p>
+<h3 id="1-토큰-수의-차이"><a class="header" href="#1-토큰-수의-차이">1. 토큰 수의 차이</a></h3>
+<p>같은 의미를 표현해도 한국어가 더 많은 토큰을 소비합니다:</p>
+<pre><code>영어: "The unified memory architecture"     →  약 5 tokens
+한국어: "통합 메모리 아키텍처"                  →  약 10 tokens
+</code></pre>
+<p>이 때문에 한국어 문서는 같은 chunk_size에서 실제로 담기는 <strong>의미의 양</strong>이 적습니다.</p>
+<blockquote>
+<p><strong>팁</strong>: 한국어 문서가 많다면 <code>chunk_size</code>를 600-800으로 약간 늘려보세요.</p>
+</blockquote>
+<h3 id="2-문장-경계"><a class="header" href="#2-문장-경계">2. 문장 경계</a></h3>
+<p>영어는 마침표(<code>.</code>)로 문장이 끝나지만, 한국어는 <code>다.</code>, <code>요.</code>, <code>죠.</code>, <code>까?</code> 등 다양하게 끝납니다. <code>RecursiveCharacterTextSplitter</code>의 <code>. </code> 기준만으로는 한국어 문장 경계를 완벽히 잡지 못할 수 있습니다.</p>
+<h2 id="전체-파이프라인-로딩--청킹"><a class="header" href="#전체-파이프라인-로딩--청킹">전체 파이프라인: 로딩 → 청킹</a></h2>
+<p>지금까지 배운 것을 연결합니다:</p>
+<pre><code class="language-python">def load_and_chunk_directory(
+    dir_path: str,
+    chunk_size: int = 500,
+    chunk_overlap: int = 50,
+) -&gt; list[dict]:
+    """Load all documents and split into chunks.
+
+    This is the complete ingestion pipeline up to chunking:
+    Files → Text → Chunks (with metadata)
+    """
+    # Step 1: Load all documents
+    docs = load_directory(dir_path)
+
+    # Step 2: Chunk each document
+    all_chunks = []
+    for doc in docs:
+        chunks = chunk_document(doc, chunk_size, chunk_overlap)
+        all_chunks.extend(chunks)
+        print(f"  {doc['metadata']['source']}: {len(chunks)} chunks")
+
+    print(f"\n  Total: {len(all_chunks)} chunks from {len(docs)} documents")
+    return all_chunks
+</code></pre>
+<pre><code class="language-python"># 실행 예
+chunks = load_and_chunk_directory("docs/", chunk_size=500, chunk_overlap=50)
+
+#   Loaded: mlx-guide.md (2,340 chars)
+#   Loaded: notes.txt (890 chars)
+#
+#   Total: 2 documents loaded
+#   mlx-guide.md: 6 chunks
+#   notes.txt: 2 chunks
+#
+#   Total: 8 chunks from 2 documents
+</code></pre>
+<h2 id="실습-청킹-결과-관찰하기"><a class="header" href="#실습-청킹-결과-관찰하기">실습: 청킹 결과 관찰하기</a></h2>
+<pre><code class="language-python">chunks = load_and_chunk_directory("docs/", chunk_size=500, chunk_overlap=50)
+
+# 각 조각의 내용과 메타데이터 확인
+for i, chunk in enumerate(chunks[:5]):  # 처음 5개만
+    print(f"\n{'=' * 50}")
+    print(f"Chunk {i}")
+    print(f"  Source: {chunk['metadata']['source']}")
+    print(f"  Index:  {chunk['metadata']['chunk_index']} / {chunk['metadata']['chunk_total']}")
+    print(f"  Length: {len(chunk['text'])} chars")
+    print(f"  Text:   {chunk['text'][:150]}...")
+</code></pre>
+<p>다양한 chunk_size로 바꿔보며 결과가 어떻게 달라지는지 관찰해보세요:</p>
+<pre><code class="language-python"># chunk_size를 바꿔보세요
+for size in [200, 500, 1000]:
+    chunks = load_and_chunk_directory("docs/", chunk_size=size)
+    print(f"  chunk_size={size}: {len(chunks)} chunks\n")
+</code></pre>
+<h2 id="핵심-정리"><a class="header" href="#핵심-정리">핵심 정리</a></h2>
+<ol>
+<li>문서를 **작은 조각(chunk)**으로 나눠야 검색 정밀도가 높아진다</li>
+<li><strong>chunk_size</strong>는 조각의 크기, <strong>chunk_overlap</strong>은 겹침 영역이다</li>
+<li>겹침이 없으면 <strong>문장이 잘려서</strong> 의미가 손실될 수 있다</li>
+<li><code>RecursiveCharacterTextSplitter</code>는 문단 → 줄 → 문장 → 단어 순으로 자연스러운 경계에서 자른다</li>
+<li>각 조각에 <strong>메타데이터</strong>(출처, 순서)를 반드시 보존해야 한다</li>
+<li>시작은 <strong>chunk_size=500, overlap=50</strong>으로</li>
+</ol>
+<hr>
+<p>이전: <a href="04-document-loading.html">04. 문서 준비</a> | 다음: <a href="06-embedding.html">06. 의미를 숫자로</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="04-document-loading.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="06-embedding.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="04-document-loading.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="06-embedding.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-c2a407aa.js"></script>
+
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-abc7f01d.js"></script>
+        <script src="book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>

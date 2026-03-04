@@ -1,0 +1,2904 @@
+<!DOCTYPE HTML>
+<html lang="ko" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>RAG Tutorial</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Mac Studio에서 Qwen3.5 MLX로 배우는 로컬 RAG 튜토리얼">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="favicon-8114d1fc.png">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-2459343d.css">
+        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex-b722dc80.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc-f39401bd.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">RAG Tutorial</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="rag-tutorial"><a class="header" href="#rag-tutorial">RAG Tutorial</a></h1>
+<p>Mac Studio M4 Max (128GB)에서 Qwen3.5 MLX 모델을 사용한 로컬 RAG(Retrieval-Augmented Generation) 학습 튜토리얼입니다.</p>
+<p>RAG가 LLM 답변 품질에 어떤 차이를 만드는지 직접 체험할 수 있습니다.</p>
+<h2 id="시작하기"><a class="header" href="#시작하기">시작하기</a></h2>
+<p><a href="#00-rag란-무엇인가">00. RAG란 무엇인가?</a>부터 시작하세요.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="00-rag란-무엇인가"><a class="header" href="#00-rag란-무엇인가">00. RAG란 무엇인가?</a></h1>
+<h2 id="도서관에서-시험-보기"><a class="header" href="#도서관에서-시험-보기">도서관에서 시험 보기</a></h2>
+<p>RAG를 이해하기 위해, 시험을 보는 학생을 상상해봅시다.</p>
+<h3 id="시나리오-1-오픈북-없이-시험"><a class="header" href="#시나리오-1-오픈북-없이-시험">시나리오 1: 오픈북 없이 시험</a></h3>
+<p>학생이 교실에 앉아 있습니다. 시험지를 받았는데, 수업 시간에 배운 내용만으로 답해야 합니다.</p>
+<ul>
+<li>수업에서 다룬 내용 → 잘 답변합니다</li>
+<li>수업에서 다루지 않은 내용 → 모르지만, <strong>그럴듯하게 지어냅니다</strong></li>
+<li>수업 이후에 바뀐 내용 → 예전 정보로 답변합니다</li>
+</ul>
+<p>이것이 바로 <strong>일반 LLM</strong>의 동작 방식입니다.</p>
+<h3 id="시나리오-2-도서관에서-오픈북-시험"><a class="header" href="#시나리오-2-도서관에서-오픈북-시험">시나리오 2: 도서관에서 오픈북 시험</a></h3>
+<p>이번에는 다릅니다. 시험 전에 <strong>도서관 사서</strong>가 도와줍니다.</p>
+<ol>
+<li>학생이 문제를 읽습니다: “양자 컴퓨팅의 최신 동향은?”</li>
+<li>사서가 관련 책을 찾아서 <strong>해당 페이지만</strong> 펼쳐줍니다</li>
+<li>학생은 그 페이지를 읽고 답변합니다</li>
+<li>답변에 “이 내용은 《양자 컴퓨팅 2025》 p.42에서 참고했습니다“라고 적습니다</li>
+</ol>
+<p>이것이 <strong>RAG</strong>입니다.</p>
+<pre><code>┌─────────────────────────────────────────────┐
+│              일반 LLM (시나리오 1)             │
+│                                             │
+│   질문 ──→ [머릿속 기억만으로] ──→ 답변        │
+│            (틀릴 수도 있음)                    │
+└─────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────┐
+│              RAG (시나리오 2)                 │
+│                                             │
+│   질문 ──→ [관련 문서 찾기] ──→ [문서를 읽고  │
+│              (사서 역할)        답변 작성]     │
+│                                ──→ 답변      │
+│                           (출처 포함)         │
+└─────────────────────────────────────────────┘
+</code></pre>
+<h2 id="rag--retrieval-augmented-generation"><a class="header" href="#rag--retrieval-augmented-generation">RAG = Retrieval-Augmented Generation</a></h2>
+<p>한국어로 <strong>검색 증강 생성</strong>이라고 합니다. 이름을 하나씩 뜯어보면:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>영어</th><th>한국어</th><th>의미</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Retrieval</strong></td><td>검색</td><td>관련 문서를 찾는다</td></tr>
+<tr><td><strong>Augmented</strong></td><td>증강</td><td>LLM의 능력을 보강한다</td></tr>
+<tr><td><strong>Generation</strong></td><td>생성</td><td>답변을 만들어낸다</td></tr>
+</tbody>
+</table>
+</div>
+<p>즉, “관련 문서를 <strong>검색</strong>해서 LLM의 능력을 <strong>증강</strong>하여 더 나은 답변을 <strong>생성</strong>한다“는 뜻입니다.</p>
+<h2 id="llm의-세-가지-한계"><a class="header" href="#llm의-세-가지-한계">LLM의 세 가지 한계</a></h2>
+<p>RAG가 왜 필요한지 이해하려면, LLM의 한계를 알아야 합니다.</p>
+<h3 id="한계-1-지식-컷오프-knowledge-cutoff"><a class="header" href="#한계-1-지식-컷오프-knowledge-cutoff">한계 1: 지식 컷오프 (Knowledge Cutoff)</a></h3>
+<p>LLM은 학습이 끝난 시점까지의 정보만 알고 있습니다.</p>
+<pre><code>예시:
+  질문: "2026년 1월에 출시된 새로운 MLX 기능은?"
+  LLM:  "제가 알고 있는 정보로는..." (학습 데이터에 없으므로 답변 불가)
+  RAG:  최신 릴리스 노트를 검색 → 정확한 답변
+</code></pre>
+<h3 id="한계-2-환각-hallucination"><a class="header" href="#한계-2-환각-hallucination">한계 2: 환각 (Hallucination)</a></h3>
+<p>LLM은 모르는 것도 그럴듯하게 지어냅니다. 자신감 있게 틀린 답을 합니다.</p>
+<pre><code>예시:
+  질문: "우리 회사의 휴가 정책은?"
+  LLM:  "일반적으로 연 15일의 유급 휴가가..." (지어낸 답변!)
+  RAG:  사내 규정 문서를 검색 → 실제 정책으로 답변
+</code></pre>
+<h3 id="한계-3-개인내부-데이터에-접근-불가"><a class="header" href="#한계-3-개인내부-데이터에-접근-불가">한계 3: 개인/내부 데이터에 접근 불가</a></h3>
+<p>LLM은 인터넷의 공개 데이터로 학습되었습니다. 여러분의 개인 문서, 회사 내부 문서, 로컬 파일의 내용은 전혀 모릅니다.</p>
+<pre><code>예시:
+  질문: "내 프로젝트의 API 엔드포인트 목록은?"
+  LLM:  "일반적인 REST API 엔드포인트는..." (일반론만 답변)
+  RAG:  프로젝트 문서를 검색 → 실제 엔드포인트 목록 반환
+</code></pre>
+<h2 id="rag가-해결하는-방법"><a class="header" href="#rag가-해결하는-방법">RAG가 해결하는 방법</a></h2>
+<p>RAG는 LLM에게 <strong>참고 자료를 건네주는</strong> 것입니다.</p>
+<p>시험에 비유하면:</p>
+<ul>
+<li>파인튜닝 = 시험 전에 새로운 내용을 더 공부시키는 것 (비싸고 오래 걸림)</li>
+<li>RAG = 시험 중에 참고 자료를 펼쳐주는 것 (빠르고 저렴)</li>
+</ul>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th>RAG</th><th>파인튜닝</th></tr>
+</thead>
+<tbody>
+<tr><td>새 정보 추가</td><td>문서만 넣으면 끝</td><td>모델을 다시 학습해야 함</td></tr>
+<tr><td>비용</td><td>저렴 (임베딩 계산만)</td><td>비쌈 (GPU 학습 필요)</td></tr>
+<tr><td>시간</td><td>분 단위</td><td>시간~일 단위</td></tr>
+<tr><td>출처 추적</td><td>가능 (“이 문서에서 왔습니다”)</td><td>불가능</td></tr>
+<tr><td>정보 업데이트</td><td>문서 교체만 하면 됨</td><td>재학습 필요</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="실제로-어디에-쓰이나"><a class="header" href="#실제로-어디에-쓰이나">실제로 어디에 쓰이나?</a></h2>
+<p>RAG는 이미 많은 곳에서 사용되고 있습니다:</p>
+<ul>
+<li><strong>사내 검색 챗봇</strong> — 회사 위키, 규정, 매뉴얼을 검색해서 답변</li>
+<li><strong>고객 지원</strong> — FAQ, 제품 문서를 기반으로 답변</li>
+<li><strong>코드 어시스턴트</strong> — 프로젝트 코드를 검색해서 코딩 질문에 답변</li>
+<li><strong>논문 분석</strong> — 연구 논문을 넣고 내용에 대해 질문</li>
+<li><strong>개인 지식 관리</strong> — 내 노트, 메모를 검색해서 필요한 정보를 찾기</li>
+</ul>
+<h2 id="이-프로젝트에서-만드는-것"><a class="header" href="#이-프로젝트에서-만드는-것">이 프로젝트에서 만드는 것</a></h2>
+<p>우리는 <strong>Mac Studio에서 완전히 로컬로 돌아가는 RAG 시스템</strong>을 만듭니다.</p>
+<ul>
+<li>인터넷 연결 없이 동작합니다</li>
+<li>내 문서(Markdown, PDF, 텍스트 파일)를 넣으면 검색합니다</li>
+<li>Qwen 모델이 검색 결과를 바탕으로 답변합니다</li>
+<li>답변에 “이 정보는 어떤 파일에서 왔는지” 출처를 표시합니다</li>
+</ul>
+<p>그리고 가장 중요한 것:</p>
+<p><strong>같은 질문을 RAG 없이 / RAG와 함께 물어보고, 답변 품질이 어떻게 달라지는지 직접 비교합니다.</strong></p>
+<h2 id="다음-단계"><a class="header" href="#다음-단계">다음 단계</a></h2>
+<p>다음 튜토리얼에서는 RAG의 전체 과정을 큰 그림으로 살펴봅니다. 각 단계가 무엇을 하는지 한눈에 이해할 수 있게 됩니다.</p>
+<hr>
+<p>다음: <a href="#01-rag의-전체-그림">01. RAG의 전체 그림</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="01-rag의-전체-그림"><a class="header" href="#01-rag의-전체-그림">01. RAG의 전체 그림</a></h1>
+<h2 id="두-개의-파이프라인"><a class="header" href="#두-개의-파이프라인">두 개의 파이프라인</a></h2>
+<p>RAG는 크게 두 단계로 나뉩니다. <strong>준비 단계</strong>와 <strong>질문 단계</strong>입니다.</p>
+<p>다시 도서관 비유로 설명하면:</p>
+<ol>
+<li><strong>준비 단계 (Ingestion)</strong> = 사서가 책을 분류하고 서가에 정리하는 과정</li>
+<li><strong>질문 단계 (Query)</strong> = 학생이 질문하면 사서가 관련 책을 찾아주는 과정</li>
+</ol>
+<p>준비 단계는 <strong>한 번만</strong> 하면 됩니다. 새 책(문서)이 추가될 때만 다시 합니다.
+질문 단계는 <strong>매 질문마다</strong> 반복됩니다.</p>
+<h2 id="준비-단계-ingestion-pipeline"><a class="header" href="#준비-단계-ingestion-pipeline">준비 단계 (Ingestion Pipeline)</a></h2>
+<p>문서를 검색 가능한 형태로 변환하는 과정입니다.</p>
+<pre><code> ① 로딩        ② 청킹          ③ 임베딩         ④ 저장
+┌──────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│ 문서  │ →  │ 텍스트    │ →  │ 텍스트    │ →  │ 숫자 벡터 │ →  벡터 DB
+│ 파일  │    │ 추출     │    │ 조각들    │    │ 변환     │    (ChromaDB)
+│.md    │    │          │    │          │    │          │
+│.pdf   │    │ "안녕    │    │ [조각1]  │    │ [0.1,    │
+│.txt   │    │  하세요  │    │ [조각2]  │    │  0.3,    │
+│       │    │  ..."    │    │ [조각3]  │    │  ...]    │
+└──────┘    └──────────┘    └──────────┘    └──────────┘
+</code></pre>
+<p>각 단계를 하나씩 살펴봅시다:</p>
+<h3 id="①-로딩-document-loading"><a class="header" href="#①-로딩-document-loading">① 로딩 (Document Loading)</a></h3>
+<p>파일을 열어서 텍스트를 추출합니다.</p>
+<ul>
+<li><code>.txt</code> 파일 → 그대로 읽기</li>
+<li><code>.md</code> 파일 → 마크다운 문법과 함께 읽기</li>
+<li><code>.pdf</code> 파일 → PDF 레이아웃을 텍스트로 변환 (가장 복잡)</li>
+</ul>
+<p><strong>비유</strong>: 도서관에 새 책이 들어왔습니다. 사서가 포장을 뜯고 책을 펼칩니다.</p>
+<h3 id="②-청킹-chunking"><a class="header" href="#②-청킹-chunking">② 청킹 (Chunking)</a></h3>
+<p>긴 텍스트를 적당한 크기의 **조각(chunk)**으로 나눕니다.</p>
+<p>왜 나누는가?</p>
+<ul>
+<li>책 한 권을 통째로 학생에게 주면 읽는 데 오래 걸립니다</li>
+<li>필요한 <strong>페이지만</strong> 펼쳐주는 것이 훨씬 효율적입니다</li>
+<li>LLM도 한 번에 처리할 수 있는 텍스트 양에 한계가 있습니다</li>
+</ul>
+<pre><code>원본 문서 (3000자):
+"RAG는 검색 증강 생성입니다. LLM이 답변을 생성할 때...
+ ...임베딩은 텍스트를 벡터로 변환합니다...
+ ...ChromaDB는 벡터를 저장합니다..."
+
+         ↓ 500자씩 나누기
+
+조각 1 (500자): "RAG는 검색 증강 생성입니다. LLM이..."
+조각 2 (500자): "...임베딩은 텍스트를 벡터로 변환..."
+조각 3 (500자): "...ChromaDB는 벡터를 저장합니다..."
+</code></pre>
+<p><strong>비유</strong>: 사서가 책의 각 장(chapter)을 색인 카드에 요약해 둡니다. 나중에 관련 장만 빠르게 찾을 수 있도록.</p>
+<h3 id="③-임베딩-embedding"><a class="header" href="#③-임베딩-embedding">③ 임베딩 (Embedding)</a></h3>
+<p>텍스트 조각을 <strong>숫자 벡터</strong>로 변환합니다. 이것이 RAG에서 가장 핵심적인 개념입니다.</p>
+<p>벡터란 무엇인가? 쉽게 말하면 <strong>텍스트의 의미를 숫자로 표현한 것</strong>입니다.</p>
+<pre><code>"고양이가 소파에 앉아 있다" → [0.82, -0.15, 0.43, ..., 0.67]
+"강아지가 침대에 누워 있다" → [0.79, -0.18, 0.41, ..., 0.64]  ← 비슷한 숫자!
+"오늘 주식 시장이 폭락했다" → [-0.23, 0.91, -0.56, ..., 0.12] ← 완전 다른 숫자
+</code></pre>
+<p>의미가 비슷한 텍스트는 비슷한 벡터를 가집니다. 이 성질 덕분에 “의미로 검색“이 가능합니다.</p>
+<p><strong>비유</strong>: 사서가 각 색인 카드에 “이 장의 내용을 좌표로 표현하면 (X, Y, Z)입니다“라고 적어둡니다. 비슷한 내용의 카드는 비슷한 좌표를 가집니다.</p>
+<h3 id="④-저장-vector-store"><a class="header" href="#④-저장-vector-store">④ 저장 (Vector Store)</a></h3>
+<p>벡터를 데이터베이스에 저장합니다. 나중에 질문이 들어오면 빠르게 비슷한 벡터를 찾을 수 있도록 합니다.</p>
+<p>이 프로젝트에서는 <strong>ChromaDB</strong>를 사용합니다. 설치만 하면 바로 쓸 수 있는 가벼운 벡터 데이터베이스입니다.</p>
+<p><strong>비유</strong>: 사서가 색인 카드를 서가에 정리해 둡니다. 좌표가 비슷한 카드끼리 가까운 서랍에 넣습니다.</p>
+<h2 id="질문-단계-query-pipeline"><a class="header" href="#질문-단계-query-pipeline">질문 단계 (Query Pipeline)</a></h2>
+<p>사용자가 질문하면 관련 문서를 찾아서 답변을 생성하는 과정입니다.</p>
+<pre><code>                    ⑤ 질문           ⑥ 검색          ⑦ 프롬프트        ⑧ 생성
+                    임베딩                           구성
+                 ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+ 사용자 질문  →   │ 질문을    │ →  │ 비슷한   │ →  │ 질문 +   │ →  │ LLM이    │ → 답변
+ "MLX란?"       │ 벡터로    │    │ 벡터 찾기 │    │ 관련 문서 │    │ 답변     │   (출처
+                │ 변환     │    │ (벡터 DB) │    │ 합치기   │    │ 생성     │   포함)
+                └──────────┘    └──────────┘    └──────────┘    └──────────┘
+</code></pre>
+<h3 id="⑤-질문-임베딩"><a class="header" href="#⑤-질문-임베딩">⑤ 질문 임베딩</a></h3>
+<p>사용자의 질문도 같은 방법으로 벡터로 변환합니다.</p>
+<pre><code>"MLX의 장점은 무엇인가?" → [0.45, -0.12, 0.78, ..., 0.33]
+</code></pre>
+<p><strong>중요</strong>: 문서를 임베딩할 때 쓴 것과 <strong>같은 모델</strong>로 질문을 임베딩해야 합니다. 다른 모델을 쓰면 벡터 공간이 달라서 검색이 안 됩니다.</p>
+<h3 id="⑥-유사도-검색-retrieval"><a class="header" href="#⑥-유사도-검색-retrieval">⑥ 유사도 검색 (Retrieval)</a></h3>
+<p>질문 벡터와 가장 비슷한 문서 조각 벡터를 찾습니다.</p>
+<pre><code>질문 벡터: [0.45, -0.12, 0.78, ...]
+
+저장된 벡터들:
+  조각 1: [0.44, -0.11, 0.77, ...] → 유사도 0.98 ★ 가장 비슷!
+  조각 2: [0.43, -0.13, 0.76, ...] → 유사도 0.95 ★ 두 번째
+  조각 3: [-0.23, 0.91, -0.56, ...] → 유사도 0.12   관련 없음
+  ...
+
+→ 상위 3개 반환: [조각 1, 조각 2, ...]
+</code></pre>
+<p><strong>비유</strong>: 학생이 “MLX의 장점은?“이라고 물었습니다. 사서가 서가에서 비슷한 좌표의 카드를 찾아 관련 페이지를 꺼내줍니다.</p>
+<h3 id="⑦-프롬프트-구성-prompt-building"><a class="header" href="#⑦-프롬프트-구성-prompt-building">⑦ 프롬프트 구성 (Prompt Building)</a></h3>
+<p>검색된 문서 조각과 질문을 합쳐서 LLM에게 보낼 프롬프트를 만듭니다.</p>
+<pre><code>┌─────────────────────────────────────────────┐
+│ 다음 문서를 참고하여 질문에 답변하세요.         │
+│                                             │
+│ [참고 문서]                                  │
+│ "MLX는 Apple이 만든 ML 프레임워크로,          │
+│  통합 메모리를 활용하여..."                    │
+│                                             │
+│ "Apple Silicon의 통합 메모리 덕분에            │
+│  CPU와 GPU가 같은 메모리를..."                │
+│                                             │
+│ [질문]                                      │
+│ MLX의 장점은 무엇인가?                        │
+│                                             │
+│ [답변]                                      │
+└─────────────────────────────────────────────┘
+</code></pre>
+<p>이것이 RAG의 핵심입니다. LLM에게 **“이 문서를 읽고 답변해”**라고 하는 것이죠.</p>
+<h3 id="⑧-생성-generation"><a class="header" href="#⑧-생성-generation">⑧ 생성 (Generation)</a></h3>
+<p>LLM이 주어진 문서와 질문을 읽고 답변을 만듭니다.</p>
+<pre><code>LLM 답변:
+"MLX의 주요 장점은 다음과 같습니다:
+ 1. Apple Silicon의 통합 메모리를 활용하여 데이터 복사 없이 CPU와 GPU가
+    같은 메모리에 접근할 수 있습니다.
+ 2. ...
+
+ (출처: mlx-guide.md, 조각 3)"
+</code></pre>
+<h2 id="전체-흐름-한눈에"><a class="header" href="#전체-흐름-한눈에">전체 흐름 한눈에</a></h2>
+<pre><code>═══════════════════════════════════════════════════
+ 준비 단계 (한 번만 실행)
+═══════════════════════════════════════════════════
+
+    내 문서들                    벡터 DB
+  ┌────────┐                  ┌────────┐
+  │guide.md│ → 로딩 → 청킹 → │        │
+  │paper.pdf│   임베딩 →     │ChromaDB│
+  │notes.txt│                │        │
+  └────────┘                  └────────┘
+
+═══════════════════════════════════════════════════
+ 질문 단계 (매번 실행)
+═══════════════════════════════════════════════════
+
+  사용자 질문                 벡터 DB        LLM (Qwen)
+  "MLX란?"  → 임베딩 → 검색 → 관련 조각 → 프롬프트 → 답변
+                      ↑                  구성
+                      │
+                 같은 벡터 공간에서 비교
+</code></pre>
+<h2 id="각-단계를-배우는-순서"><a class="header" href="#각-단계를-배우는-순서">각 단계를 배우는 순서</a></h2>
+<p>이 튜토리얼은 위 파이프라인의 각 단계를 하나씩 구현해나갑니다:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>튜토리얼</th><th>배우는 단계</th><th>비유</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="#02-환경-설정">02. 환경 설정</a></td><td>도구 준비</td><td>도서관 건물 짓기</td></tr>
+<tr><td><a href="#03-llm-만나기">03. LLM 만나기</a></td><td>⑧ 생성</td><td>학생 만나기</td></tr>
+<tr><td><a href="#04-문서-준비와-로딩">04. 문서 준비</a></td><td>① 로딩</td><td>책 입고</td></tr>
+<tr><td><a href="#05-텍스트-자르기-chunking">05. 텍스트 자르기</a></td><td>② 청킹</td><td>색인 카드 만들기</td></tr>
+<tr><td><a href="#06-의미를-숫자로-embedding">06. 의미를 숫자로</a></td><td>③ 임베딩</td><td>좌표 매기기</td></tr>
+<tr><td><a href="#07-벡터-저장소-vector-store">07. 벡터 저장소</a></td><td>④ 저장</td><td>서가에 정리</td></tr>
+<tr><td><a href="#08-검색하기-retrieval">08. 검색하기</a></td><td>⑤⑥ 검색</td><td>사서가 찾아주기</td></tr>
+<tr><td><a href="#09-rag-파이프라인-조립">09. 파이프라인 조립</a></td><td>⑦ 프롬프트 구성</td><td>전체 연결</td></tr>
+<tr><td><a href="#10-rag의-차이--최종-비교">10. RAG의 차이</a></td><td>최종 비교</td><td>시험 결과 비교</td></tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p><strong>팁</strong>: 먼저 LLM을 만나봅니다(03). LLM이 뭘 잘하고 뭘 못하는지 체감한 후에, 나머지 단계의 “왜“가 자연스럽게 이해됩니다.</p>
+</blockquote>
+<h2 id="핵심-정리"><a class="header" href="#핵심-정리">핵심 정리</a></h2>
+<ol>
+<li>RAG는 <strong>검색 + 생성</strong>입니다</li>
+<li><strong>준비 단계</strong>: 문서 → 조각으로 나누기 → 벡터로 변환 → 저장</li>
+<li><strong>질문 단계</strong>: 질문 → 관련 조각 검색 → 질문 + 조각을 LLM에 전달 → 답변</li>
+<li>모든 것이 <strong>내 컴퓨터에서 로컬로</strong> 동작합니다</li>
+<li>프레임워크 없이 각 단계를 직접 만들면, RAG가 어떻게 작동하는지 완전히 이해할 수 있습니다</li>
+</ol>
+<hr>
+<p>이전: <a href="#00-rag란-무엇인가">00. RAG란 무엇인가</a> | 다음: <a href="#02-환경-설정">02. 환경 설정</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="02-환경-설정"><a class="header" href="#02-환경-설정">02. 환경 설정</a></h1>
+<h2 id="필요한-것들"><a class="header" href="#필요한-것들">필요한 것들</a></h2>
+<p>이 프로젝트를 실행하려면 다음이 필요합니다:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>필요한 것</th><th>역할</th><th>비유</th></tr>
+</thead>
+<tbody>
+<tr><td>Apple Silicon Mac</td><td>하드웨어</td><td>도서관 건물</td></tr>
+<tr><td>Python 3.11+</td><td>프로그래밍 언어</td><td>사서의 언어</td></tr>
+<tr><td>MLX + mlx-lm</td><td>LLM 실행 엔진</td><td>학생의 뇌</td></tr>
+<tr><td>sentence-transformers</td><td>임베딩 모델</td><td>색인 카드 작성기</td></tr>
+<tr><td>ChromaDB</td><td>벡터 데이터베이스</td><td>서가</td></tr>
+<tr><td>pymupdf4llm</td><td>PDF 변환</td><td>책 스캐너</td></tr>
+<tr><td>Jupyter</td><td>노트북 환경</td><td>실험실</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="step-1-python-환경-만들기"><a class="header" href="#step-1-python-환경-만들기">Step 1: Python 환경 만들기</a></h2>
+<h3 id="가상환경이란"><a class="header" href="#가상환경이란">가상환경이란?</a></h3>
+<p>Python 프로젝트마다 필요한 패키지가 다릅니다. 가상환경은 프로젝트별로 <strong>독립적인 Python 환경</strong>을 만들어줍니다.</p>
+<p>비유하면, 실험실마다 다른 도구 세트를 갖추는 것과 같습니다. 한 실험실의 도구를 바꿔도 다른 실험실에는 영향이 없습니다.</p>
+<pre><code class="language-bash"># 터미널에서 프로젝트 폴더로 이동
+cd ~/vibe-coding/RAG
+
+# Python 버전 확인 (3.11 이상이어야 합니다)
+python3 --version
+# Python 3.11.x 또는 3.12.x
+
+# 가상환경 생성 (.venv라는 폴더가 만들어집니다)
+python3 -m venv .venv
+
+# 가상환경 활성화
+source .venv/bin/activate
+
+# 활성화되면 프롬프트 앞에 (.venv)가 표시됩니다:
+# (.venv) ~/vibe-coding/RAG $
+</code></pre>
+<blockquote>
+<p><strong>중요</strong>: 터미널을 새로 열 때마다 <code>source .venv/bin/activate</code>를 실행해야 합니다. 그래야 이 프로젝트의 Python 환경을 사용합니다.</p>
+</blockquote>
+<h3 id="pip-업그레이드"><a class="header" href="#pip-업그레이드">pip 업그레이드</a></h3>
+<pre><code class="language-bash">pip install --upgrade pip
+</code></pre>
+<h2 id="step-2-패키지-설치"><a class="header" href="#step-2-패키지-설치">Step 2: 패키지 설치</a></h2>
+<h3 id="하나씩-설치하며-이해하기"><a class="header" href="#하나씩-설치하며-이해하기">하나씩 설치하며 이해하기</a></h3>
+<p>각 패키지가 무엇을 하는지 알고 설치합시다:</p>
+<pre><code class="language-bash"># 1. MLX — Apple Silicon을 위한 ML 프레임워크
+#    Apple이 만들었습니다. PyTorch/TensorFlow 대신 사용합니다.
+pip install mlx
+
+# 2. mlx-lm — MLX 위에서 LLM을 쉽게 쓸 수 있게 해주는 도구
+#    모델 다운로드, 로딩, 텍스트 생성을 간단하게 해줍니다.
+pip install mlx-lm
+
+# 3. sentence-transformers — 텍스트를 벡터(임베딩)로 변환
+#    우리는 BAAI/bge-m3 모델을 여기서 실행합니다.
+pip install sentence-transformers
+
+# 4. ChromaDB — 벡터를 저장하고 검색하는 데이터베이스
+#    설치만 하면 바로 쓸 수 있습니다. 별도 서버가 필요 없습니다.
+pip install chromadb
+
+# 5. pymupdf4llm — PDF 파일을 텍스트로 변환
+#    PDF의 복잡한 레이아웃을 깔끔하게 텍스트로 바꿔줍니다.
+pip install pymupdf4llm
+
+# 6. langchain-text-splitters — 텍스트를 조각(chunk)으로 나누는 도구
+#    주의: LangChain 전체가 아니라, 텍스트 분할 기능만 사용합니다.
+pip install langchain-text-splitters
+
+# 7. Jupyter — 코드를 한 줄씩 실행하며 결과를 볼 수 있는 노트북 환경
+pip install jupyter ipykernel
+</code></pre>
+<h3 id="한-줄로-한꺼번에-설치"><a class="header" href="#한-줄로-한꺼번에-설치">한 줄로 한꺼번에 설치</a></h3>
+<p>위 패키지를 한 번에 설치할 수도 있습니다:</p>
+<pre><code class="language-bash">pip install mlx mlx-lm sentence-transformers chromadb pymupdf4llm langchain-text-splitters jupyter ipykernel
+</code></pre>
+<h3 id="requirementstxt-만들기"><a class="header" href="#requirementstxt-만들기">requirements.txt 만들기</a></h3>
+<p>나중에 환경을 다시 만들 때 편하도록 패키지 목록을 파일로 저장합니다:</p>
+<pre><code># requirements.txt
+mlx&gt;=0.21.0
+mlx-lm&gt;=0.20.0
+sentence-transformers&gt;=3.0.0
+chromadb&gt;=1.0.0
+pymupdf4llm&gt;=0.3.0
+langchain-text-splitters&gt;=0.3.0
+jupyter
+ipykernel
+</code></pre>
+<pre><code class="language-bash"># 나중에 이 파일로 한 번에 설치할 수 있습니다:
+pip install -r requirements.txt
+</code></pre>
+<h2 id="step-3-모델-다운로드"><a class="header" href="#step-3-모델-다운로드">Step 3: 모델 다운로드</a></h2>
+<p>우리 프로젝트에서 사용하는 AI 모델은 두 개입니다:</p>
+<h3 id="llm-qwen25-7b-instruct-mlx-4-bit"><a class="header" href="#llm-qwen25-7b-instruct-mlx-4-bit">LLM: Qwen2.5-7B-Instruct (MLX 4-bit)</a></h3>
+<p>질문에 답변하는 모델입니다. 약 <strong>4.5GB</strong>입니다.</p>
+<pre><code class="language-python"># Python에서 실행하면 자동으로 다운로드됩니다
+python3 -c "
+from mlx_lm import load
+print('Downloading Qwen model...')
+model, tokenizer = load('mlx-community/Qwen2.5-7B-Instruct-4bit')
+print('Done! Model loaded successfully.')
+"
+</code></pre>
+<blockquote>
+<p><strong>“4-bit“란?</strong> 모델의 숫자 정밀도를 줄여서 크기를 작게 만든 것입니다. 원래 모델은 ~14GB이지만, 4-bit로 압축하면 ~4.5GB가 됩니다. 품질은 약간 떨어지지만 학습용으로 충분합니다.</p>
+</blockquote>
+<blockquote>
+<p><strong>“Instruct“란?</strong> 사용자의 지시를 따르도록 추가 학습된 모델입니다. 일반 모델은 텍스트를 이어서 쓰기만 하지만, Instruct 모델은 질문에 답변하는 형태로 동작합니다.</p>
+</blockquote>
+<h3 id="임베딩-모델-baaibge-m3"><a class="header" href="#임베딩-모델-baaibge-m3">임베딩 모델: BAAI/bge-m3</a></h3>
+<p>텍스트를 벡터로 변환하는 모델입니다. 약 <strong>2.3GB</strong>입니다.</p>
+<pre><code class="language-python">python3 -c "
+from sentence_transformers import SentenceTransformer
+print('Downloading embedding model...')
+model = SentenceTransformer('BAAI/bge-m3')
+print('Done! Embedding model loaded successfully.')
+"
+</code></pre>
+<blockquote>
+<p><strong>왜 bge-m3인가?</strong> 이 모델은 100개 이상의 언어를 지원합니다. 한국어 문서와 영어 문서를 모두 다룰 수 있습니다. 영어만 지원하는 모델(예: <code>all-MiniLM-L6-v2</code>)을 쓰면 <strong>한국어 검색이 조용히 실패</strong>합니다 — 에러 없이 엉뚱한 결과가 나옵니다.</p>
+</blockquote>
+<h2 id="step-4-설치-확인"><a class="header" href="#step-4-설치-확인">Step 4: 설치 확인</a></h2>
+<p>모든 것이 제대로 설치되었는지 확인하는 스크립트입니다:</p>
+<pre><code class="language-python"># check_install.py — 이 코드를 실행해보세요
+
+print("=" * 50)
+print("RAG Tutorial — Installation Check")
+print("=" * 50)
+
+# 1. MLX
+import mlx.core as mx
+print(f"\n✓ MLX version: {mx.__version__}")
+print(f"  Metal (GPU) available: {mx.metal.is_available()}")
+print(f"  Memory limit: {mx.metal.memory_limit() / 1e9:.1f} GB")
+
+# 2. ChromaDB
+import chromadb
+print(f"\n✓ ChromaDB version: {chromadb.__version__}")
+
+# 3. sentence-transformers
+import sentence_transformers
+print(f"\n✓ sentence-transformers version: {sentence_transformers.__version__}")
+
+# 4. mlx-lm
+import mlx_lm
+print(f"\n✓ mlx-lm OK")
+
+# 5. pymupdf4llm
+import pymupdf4llm
+print(f"\n✓ pymupdf4llm OK")
+
+# 6. langchain-text-splitters
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+print(f"\n✓ langchain-text-splitters OK")
+
+print("\n" + "=" * 50)
+print("All packages installed successfully!")
+print("=" * 50)
+</code></pre>
+<h3 id="기대하는-출력"><a class="header" href="#기대하는-출력">기대하는 출력</a></h3>
+<pre><code>==================================================
+RAG Tutorial — Installation Check
+==================================================
+
+✓ MLX version: 0.31.0
+  Metal (GPU) available: True
+  Memory limit: 96.0 GB
+
+✓ ChromaDB version: 1.5.2
+
+✓ sentence-transformers version: 5.2.3
+
+✓ mlx-lm OK
+
+✓ pymupdf4llm OK
+
+✓ langchain-text-splitters OK
+
+==================================================
+All packages installed successfully!
+==================================================
+</code></pre>
+<blockquote>
+<p><strong>Metal memory limit가 96GB?</strong> 128GB Mac인데 96GB만 표시되는 것은 정상입니다. macOS가 GPU(Metal)에 전체 메모리의 약 75%만 할당합니다. 나머지 25%는 OS와 다른 프로세스가 사용합니다.</p>
+</blockquote>
+<h2 id="step-5-jupyter-커널-등록"><a class="header" href="#step-5-jupyter-커널-등록">Step 5: Jupyter 커널 등록</a></h2>
+<p>Jupyter 노트북에서 우리 가상환경을 사용할 수 있도록 등록합니다:</p>
+<pre><code class="language-bash">python -m ipykernel install --user --name=rag-tutorial --display-name="RAG Tutorial"
+</code></pre>
+<p>이제 Jupyter에서 노트북을 만들 때 “RAG Tutorial” 커널을 선택할 수 있습니다.</p>
+<h3 id="jupyter-실행-테스트"><a class="header" href="#jupyter-실행-테스트">Jupyter 실행 테스트</a></h3>
+<pre><code class="language-bash">jupyter notebook
+</code></pre>
+<p>브라우저가 열리면 새 노트북을 만들고, 커널을 “RAG Tutorial“로 선택한 뒤, 다음 코드를 실행해보세요:</p>
+<pre><code class="language-python">import mlx.core as mx
+print(f"Hello from MLX! GPU available: {mx.metal.is_available()}")
+</code></pre>
+<h2 id="문제-해결"><a class="header" href="#문제-해결">문제 해결</a></h2>
+<h3 id="pip-command-not-found"><a class="header" href="#pip-command-not-found">“pip: command not found”</a></h3>
+<p>가상환경이 활성화되지 않았습니다:</p>
+<pre><code class="language-bash">source .venv/bin/activate
+</code></pre>
+<h3 id="metal-is-not-available"><a class="header" href="#metal-is-not-available">“Metal is not available”</a></h3>
+<p>Apple Silicon이 아닌 Intel Mac에서는 MLX의 GPU 가속을 사용할 수 없습니다. <code>M1</code> 이상의 칩이 필요합니다.</p>
+<h3 id="모델-다운로드가-느림"><a class="header" href="#모델-다운로드가-느림">모델 다운로드가 느림</a></h3>
+<p>모델은 Hugging Face에서 다운로드됩니다. 첫 번째 다운로드 시 인터넷 연결이 필요합니다. 이후에는 로컬 캐시에서 로딩되므로 인터넷이 필요 없습니다.</p>
+<p>캐시 위치: <code>~/.cache/huggingface/hub/</code></p>
+<hr>
+<p>이전: <a href="#01-rag의-전체-그림">01. RAG의 전체 그림</a> | 다음: <a href="#03-llm-만나기">03. LLM 만나기</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="03-llm-만나기"><a class="header" href="#03-llm-만나기">03. LLM 만나기</a></h1>
+<h2 id="왜-llm부터-시작하나"><a class="header" href="#왜-llm부터-시작하나">왜 LLM부터 시작하나?</a></h2>
+<p>RAG를 만들기 전에, 먼저 LLM이 <strong>무엇을 잘하고 무엇을 못하는지</strong> 직접 체험해봐야 합니다.</p>
+<p>LLM의 한계를 직접 느껴봐야, 나머지 RAG 단계들이 <strong>왜 필요한지</strong> 자연스럽게 이해됩니다.</p>
+<h2 id="llm이란"><a class="header" href="#llm이란">LLM이란?</a></h2>
+<p>LLM(Large Language Model)은 <strong>다음 단어를 예측하는 모델</strong>입니다.</p>
+<pre><code>입력: "오늘 날씨가"
+모델: "좋습니다" (확률 35%)
+      "맑습니다" (확률 28%)
+      "흐립니다" (확률 15%)
+      ...
+</code></pre>
+<p>수조 개의 텍스트를 읽고 “이 단어 다음에 어떤 단어가 올 확률이 높은가“를 학습한 것입니다. 놀라운 것은, 이 단순한 원리로 질문에 답하고, 글을 쓰고, 코드를 작성할 수 있다는 점입니다.</p>
+<blockquote>
+<p><strong>중요한 오해</strong>: LLM은 “이해“하거나 “알고” 있는 것이 아닙니다. 학습 데이터의 패턴을 바탕으로 그럴듯한 다음 단어를 생성하는 것입니다. 이 차이가 환각(hallucination)의 원인입니다.</p>
+</blockquote>
+<h2 id="첫-번째-대화"><a class="header" href="#첫-번째-대화">첫 번째 대화</a></h2>
+<p>Jupyter 노트북을 열고, 커널을 “RAG Tutorial“로 선택한 뒤 실행합니다.</p>
+<h3 id="모델-로딩"><a class="header" href="#모델-로딩">모델 로딩</a></h3>
+<pre><code class="language-python">from mlx_lm import load, generate
+import mlx.core as mx
+
+# 모델 로딩 (첫 실행 시 약 1-2분 소요)
+model, tokenizer = load("mlx-community/Qwen2.5-7B-Instruct-4bit")
+
+print(f"Model loaded!")
+print(f"GPU memory used: {mx.metal.get_active_memory() / 1e9:.1f} GB")
+</code></pre>
+<h3 id="간단한-질문"><a class="header" href="#간단한-질문">간단한 질문</a></h3>
+<pre><code class="language-python"># LLM에게 질문하는 함수
+def ask(question, system_prompt="You are a helpful assistant. Answer in Korean."):
+    """Ask a question to the LLM."""
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": question},
+    ]
+
+    prompt = tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True,
+    )
+
+    response = generate(
+        model,
+        tokenizer,
+        prompt=prompt,
+        max_tokens=500,
+        temp=0.7,
+    )
+
+    # Clean up GPU memory
+    mx.metal.clear_cache()
+
+    return response
+</code></pre>
+<pre><code class="language-python"># 첫 번째 질문
+answer = ask("RAG란 무엇인가요? 간단히 설명해주세요.")
+print(answer)
+</code></pre>
+<p>LLM이 RAG에 대해 잘 설명할 것입니다. 이건 학습 데이터에 포함된 일반 지식이기 때문입니다.</p>
+<h2 id="llm의-한계-체험하기"><a class="header" href="#llm의-한계-체험하기">LLM의 한계 체험하기</a></h2>
+<p>이제 LLM이 <strong>못하는 것</strong>을 직접 확인합시다.</p>
+<h3 id="실험-1-내-문서에-대한-질문"><a class="header" href="#실험-1-내-문서에-대한-질문">실험 1: 내 문서에 대한 질문</a></h3>
+<p>아래와 같은 내용의 문서가 있다고 상상해보세요:</p>
+<pre><code># 우리 팀 개발 규칙
+- 코드 리뷰는 최소 2명이 승인해야 머지 가능
+- 브랜치 이름은 feature/JIRA-번호-설명 형식
+- 배포는 매주 화요일 오후 3시
+- 핫픽스는 팀장 승인 후 즉시 배포 가능
+</code></pre>
+<p>이 문서를 LLM에게 보여준 적이 없습니다. 질문해봅시다:</p>
+<pre><code class="language-python">answer = ask("우리 팀의 코드 리뷰 규칙은 어떻게 되나요?")
+print(answer)
+</code></pre>
+<p><strong>예상 결과</strong>: LLM은 <strong>일반적인</strong> 코드 리뷰 모범 사례를 답변합니다. 우리 팀의 규칙(“최소 2명 승인”)은 모릅니다.</p>
+<h3 id="실험-2-최신-정보"><a class="header" href="#실험-2-최신-정보">실험 2: 최신 정보</a></h3>
+<pre><code class="language-python">answer = ask("2026년 2월에 출시된 MLX의 새로운 기능은 무엇인가요?")
+print(answer)
+</code></pre>
+<p><strong>예상 결과</strong>: LLM은 학습 데이터에 없는 정보이므로, 오래된 정보를 답하거나 “잘 모르겠습니다“라고 할 것입니다.</p>
+<h3 id="실험-3-환각-hallucination"><a class="header" href="#실험-3-환각-hallucination">실험 3: 환각 (Hallucination)</a></h3>
+<pre><code class="language-python">answer = ask("김철수 교수의 2024년 양자 컴퓨팅 논문의 핵심 결론은?")
+print(answer)
+</code></pre>
+<p><strong>예상 결과</strong>: LLM은 존재하지 않는 논문에 대해 <strong>그럴듯한 답변을 지어냅니다</strong>. 자신감 있게 틀린 정보를 말합니다. 이것이 환각(hallucination)입니다.</p>
+<h2 id="rag가-이-문제를-어떻게-해결하는가"><a class="header" href="#rag가-이-문제를-어떻게-해결하는가">RAG가 이 문제를 어떻게 해결하는가</a></h2>
+<p>위 실험의 결과를 정리하면:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>질문 유형</th><th>LLM만</th><th>LLM + RAG</th></tr>
+</thead>
+<tbody>
+<tr><td>일반 지식</td><td>✓ 잘 답변</td><td>✓ 잘 답변</td></tr>
+<tr><td>내 문서 내용</td><td>✗ 모름, 일반론</td><td>✓ 문서 검색 후 정확히 답변</td></tr>
+<tr><td>최신 정보</td><td>✗ 오래된 정보</td><td>✓ 최신 문서가 있으면 답변</td></tr>
+<tr><td>환각 위험</td><td>✗ 높음</td><td>✓ 낮음 (문서에 없으면 “없다“고 답)</td></tr>
+</tbody>
+</table>
+</div>
+<p>RAG는 질문 전에 관련 문서를 찾아서 LLM에게 함께 보내줍니다. LLM은 자기 기억 대신 <strong>주어진 문서를 근거로</strong> 답변합니다.</p>
+<h2 id="mlx-메모리-관리--중요"><a class="header" href="#mlx-메모리-관리--중요">MLX 메모리 관리 — 중요!</a></h2>
+<p>Apple Silicon에서 LLM을 돌릴 때 반드시 알아야 할 것이 있습니다.</p>
+<h3 id="캐시를-정리하지-않으면"><a class="header" href="#캐시를-정리하지-않으면">캐시를 정리하지 않으면</a></h3>
+<pre><code class="language-python"># 이 코드를 Jupyter에서 실행하며 메모리를 관찰하세요
+
+for i in range(5):
+    answer = ask(f"숫자 {i}에 대해 재미있는 사실을 알려주세요.")
+    memory_gb = mx.metal.get_active_memory() / 1e9
+    print(f"질문 {i}: memory = {memory_gb:.2f} GB")
+</code></pre>
+<p>메모리가 계속 증가하는 것을 볼 수 있습니다! 이것은 MLX가 KV cache를 저장하기 때문입니다.</p>
+<h3 id="해결-매번-캐시-정리"><a class="header" href="#해결-매번-캐시-정리">해결: 매번 캐시 정리</a></h3>
+<p>위의 <code>ask()</code> 함수에서 이미 <code>mx.metal.clear_cache()</code>를 호출하고 있습니다. 이것이 <strong>필수</strong>입니다.</p>
+<pre><code class="language-python"># ask() 함수 안에서:
+response = generate(model, tokenizer, prompt=prompt, max_tokens=500, temp=0.7)
+mx.metal.clear_cache()  # ← 이 줄이 없으면 메모리가 계속 증가합니다!
+</code></pre>
+<blockquote>
+<p><strong>규칙</strong>: <code>generate()</code> 호출 후에는 반드시 <code>mx.metal.clear_cache()</code>를 호출하세요. 특히 RAG에서는 매번 다른 컨텍스트를 사용하므로, 이전 캐시가 재사용되지 않고 메모리만 낭비합니다.</p>
+</blockquote>
+<h3 id="metal-메모리-한도"><a class="header" href="#metal-메모리-한도">Metal 메모리 한도</a></h3>
+<p>128GB Mac에서 GPU가 사용할 수 있는 메모리는 약 <strong>96GB</strong> (75%)입니다.</p>
+<pre><code class="language-python">print(f"Memory limit: {mx.metal.memory_limit() / 1e9:.1f} GB")
+# 출력: Memory limit: 96.0 GB
+</code></pre>
+<p>이 한도를 넘으면 에러가 나는 게 아니라, <strong>조용히 CPU로 전환</strong>됩니다. 속도가 10~50배 느려지지만 경고가 없습니다. 메모리를 주시하는 습관을 들이세요.</p>
+<h2 id="생성-파라미터-이해하기"><a class="header" href="#생성-파라미터-이해하기">생성 파라미터 이해하기</a></h2>
+<p><code>generate()</code> 함수의 주요 파라미터입니다:</p>
+<h3 id="temperature-temp"><a class="header" href="#temperature-temp">temperature (temp)</a></h3>
+<p>모델의 <strong>창의성</strong>을 조절합니다.</p>
+<pre><code class="language-python"># temp=0.0 — 항상 같은 답변 (결정적)
+answer = ask("1+1은?", temp=0.0)
+
+# temp=0.7 — 적당히 다양한 답변 (기본값)
+answer = ask("시 한 편 써줘", temp=0.7)
+
+# temp=1.0 — 매우 다양한 답변 (창의적, 때로 엉뚱)
+answer = ask("시 한 편 써줘", temp=1.0)
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>temp</th><th>성격</th><th>적합한 용도</th></tr>
+</thead>
+<tbody>
+<tr><td>0.0</td><td>결정적, 일관됨</td><td>사실 기반 Q&amp;A, 코드</td></tr>
+<tr><td>0.3-0.5</td><td>약간의 변화</td><td>RAG 답변 (사실 + 자연스러움)</td></tr>
+<tr><td>0.7</td><td>균형</td><td>일반 대화</td></tr>
+<tr><td>1.0+</td><td>창의적, 예측 불가</td><td>스토리텔링, 브레인스토밍</td></tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p><strong>RAG에서는 temp=0.3 정도를 추천</strong>합니다. 문서의 정보를 충실히 반영하되, 자연스러운 문장을 만들어야 하기 때문입니다.</p>
+</blockquote>
+<h3 id="max_tokens"><a class="header" href="#max_tokens">max_tokens</a></h3>
+<p>생성할 최대 토큰(단어 조각) 수입니다.</p>
+<pre><code class="language-python"># 짧은 답변
+answer = ask("MLX란?", max_tokens=50)   # ~2-3문장
+
+# 긴 답변
+answer = ask("MLX란?", max_tokens=500)  # ~1-2 문단
+</code></pre>
+<blockquote>
+<p><strong>토큰이란?</strong> 단어를 모델이 처리하는 단위로 쪼갠 것입니다. 영어에서는 대략 1단어 = 1토큰이지만, 한국어에서는 1글자가 1-3토큰이 될 수 있습니다. 그래서 한국어는 같은 내용이라도 더 많은 토큰이 필요합니다.</p>
+</blockquote>
+<h2 id="실습-llm과-대화하기"><a class="header" href="#실습-llm과-대화하기">실습: LLM과 대화하기</a></h2>
+<p>아래 질문들을 하나씩 LLM에게 물어보세요. 어떤 질문에 잘 답하고, 어떤 질문에 못 답하는지 직접 느껴보세요.</p>
+<pre><code class="language-python"># 잘 답하는 질문들 (일반 지식)
+ask("Python에서 리스트와 튜플의 차이는?")
+ask("뉴턴의 운동 법칙을 설명해줘")
+ask("김치찌개 레시피를 알려줘")
+
+# 못 답하는 질문들 (개인/내부/최신 정보)
+ask("내 프로젝트의 데이터베이스 스키마는?")
+ask("우리 회사 연봉 테이블은?")
+ask("어제 내가 쓴 메모 내용은?")
+</code></pre>
+<p>이 격차가 RAG의 존재 이유입니다. 다음 튜토리얼부터 이 격차를 메우는 과정을 시작합니다.</p>
+<h2 id="핵심-정리-1"><a class="header" href="#핵심-정리-1">핵심 정리</a></h2>
+<ol>
+<li>LLM은 <strong>다음 단어를 예측</strong>하는 모델이다</li>
+<li>학습 데이터에 있는 일반 지식은 잘 답하지만, <strong>내 문서/최신 정보는 모른다</strong></li>
+<li>모르는 것도 <strong>그럴듯하게 지어내는</strong> 것이 위험 (환각)</li>
+<li><code>mx.metal.clear_cache()</code>를 매번 호출해야 메모리가 안정적이다</li>
+<li>RAG는 이 한계를 극복하기 위해 <strong>관련 문서를 찾아서 LLM에게 보여주는</strong> 방법이다</li>
+</ol>
+<hr>
+<p>이전: <a href="#02-환경-설정">02. 환경 설정</a> | 다음: <a href="#04-문서-준비와-로딩">04. 문서 준비</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="04-문서-준비와-로딩"><a class="header" href="#04-문서-준비와-로딩">04. 문서 준비와 로딩</a></h1>
+<h2 id="이-단계의-위치"><a class="header" href="#이-단계의-위치">이 단계의 위치</a></h2>
+<pre><code> ★ 여기!
+ ① 로딩        ② 청킹          ③ 임베딩         ④ 저장
+┌──────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│ 문서  │ →  │ 텍스트    │ →  │ 벡터     │ →  │ 벡터 DB  │
+│ 파일  │    │ 조각들    │    │ 변환     │    │ 저장     │
+└──────┘    └──────────┘    └──────────┘    └──────────┘
+</code></pre>
+<p>RAG의 모든 것은 <strong>문서</strong>에서 시작합니다. 문서가 없으면 검색할 것도 없습니다.</p>
+<p>이 단계에서는 다양한 형식의 파일을 열어서 <strong>순수한 텍스트</strong>를 꺼내는 방법을 배웁니다.</p>
+<h2 id="문서-로딩이란"><a class="header" href="#문서-로딩이란">문서 로딩이란?</a></h2>
+<p>비유하면, 도서관에 새 책이 도착한 것과 같습니다.</p>
+<ul>
+<li>어떤 책은 <strong>일반 소설</strong> (텍스트 파일) — 그냥 읽으면 됩니다</li>
+<li>어떤 책은 <strong>사진이 있는 잡지</strong> (마크다운) — 본문 텍스트만 뽑아야 합니다</li>
+<li>어떤 책은 <strong>복잡한 보고서</strong> (PDF) — 표, 그림, 각주를 걸러내고 텍스트만 추출해야 합니다</li>
+</ul>
+<p>결국 목표는 하나입니다: <strong>깨끗한 텍스트</strong>를 얻는 것.</p>
+<pre><code>guide.md  ──→ "MLX는 Apple이 만든..."     (텍스트)
+report.pdf ──→ "2024년 분기 실적은..."     (텍스트)
+notes.txt  ──→ "오늘 회의에서 결정된..."    (텍스트)
+</code></pre>
+<h2 id="텍스트-파일-txt-로딩"><a class="header" href="#텍스트-파일-txt-로딩">텍스트 파일 (.txt) 로딩</a></h2>
+<p>가장 간단합니다. 파일을 열어서 읽으면 끝입니다.</p>
+<pre><code class="language-python">from pathlib import Path
+
+def load_txt(file_path: str) -&gt; dict:
+    """Load a plain text file.
+
+    Returns a dictionary with the text content and metadata.
+    Metadata is used later for source citation.
+    """
+    path = Path(file_path)
+    text = path.read_text(encoding="utf-8")
+
+    return {
+        "text": text,
+        "metadata": {
+            "source": path.name,     # "notes.txt"
+            "format": "txt",
+        }
+    }
+</code></pre>
+<p><strong>왜 딕셔너리(dict)로 반환하는가?</strong></p>
+<p>텍스트만 반환하면 이 텍스트가 <strong>어디서 왔는지</strong> 알 수 없습니다. 나중에 RAG가 “이 정보는 notes.txt에서 가져왔습니다“라고 출처를 표시하려면, 처음부터 메타데이터를 함께 가지고 다녀야 합니다.</p>
+<pre><code class="language-python"># 사용 예
+doc = load_txt("docs/notes.txt")
+print(doc["text"][:100])      # 텍스트 내용
+print(doc["metadata"])         # {'source': 'notes.txt', 'format': 'txt'}
+</code></pre>
+<h2 id="마크다운-파일-md-로딩"><a class="header" href="#마크다운-파일-md-로딩">마크다운 파일 (.md) 로딩</a></h2>
+<p>마크다운은 <code>#</code>, <code>**</code>, <code>-</code> 같은 문법 기호가 포함되어 있습니다. 하지만 이 기호들도 내용의 일부이므로 그대로 둡니다. 대신 제목(heading)을 메타데이터로 추출합니다.</p>
+<pre><code class="language-python">def load_markdown(file_path: str) -&gt; dict:
+    """Load a markdown file.
+
+    Keeps markdown formatting as-is (headings, bold, lists).
+    Extracts the first heading as the document title.
+    """
+    path = Path(file_path)
+    text = path.read_text(encoding="utf-8")
+
+    # Extract title from first heading (# Title)
+    title = None
+    for line in text.split("\n"):
+        if line.startswith("# "):
+            title = line[2:].strip()
+            break
+
+    return {
+        "text": text,
+        "metadata": {
+            "source": path.name,
+            "format": "markdown",
+            "title": title,           # "MLX Guide" 등
+        }
+    }
+</code></pre>
+<p><strong>왜 마크다운 문법을 제거하지 않는가?</strong></p>
+<p><code>#</code> (제목), <code>**</code> (강조) 같은 기호는 LLM이 문서의 구조를 이해하는 데 도움이 됩니다. 제목이 있으면 “이 섹션의 주제가 뭔지” 알 수 있기 때문입니다.</p>
+<h2 id="pdf-파일-pdf-로딩"><a class="header" href="#pdf-파일-pdf-로딩">PDF 파일 (.pdf) 로딩</a></h2>
+<p>PDF는 가장 복잡합니다. PDF는 원래 <strong>인쇄</strong>를 위한 형식이지 텍스트 추출을 위한 형식이 아닙니다.</p>
+<h3 id="pdf의-문제점"><a class="header" href="#pdf의-문제점">PDF의 문제점</a></h3>
+<pre><code>PDF 파일 내부:
+┌──────────────────────┐
+│ 제목 (큰 글씨)        │
+│ 본문 텍스트           │  ← 이것만 필요
+│ [이미지]              │  ← 불필요
+│ 각주 (작은 글씨)      │  ← 섞이면 혼란
+│ 페이지 번호           │  ← 불필요
+└──────────────────────┘
+
+일반 PDF 파서로 읽으면:
+"제목본문 텍스트이미지 설명각주페이지 번호"
+→ 줄바꿈, 공백이 엉망이 됩니다
+</code></pre>
+<h3 id="pymupdf4llm으로-깔끔하게-변환"><a class="header" href="#pymupdf4llm으로-깔끔하게-변환">pymupdf4llm으로 깔끔하게 변환</a></h3>
+<p><code>pymupdf4llm</code>은 PDF의 레이아웃을 분석해서 <strong>마크다운 형태</strong>로 깔끔하게 변환합니다.</p>
+<pre><code class="language-python">import pymupdf4llm
+
+def load_pdf(file_path: str) -&gt; dict:
+    """Load a PDF file using pymupdf4llm.
+
+    Converts PDF layout to clean markdown text.
+    Handles tables, headings, and multi-column layouts.
+    """
+    path = Path(file_path)
+    md_text = pymupdf4llm.to_markdown(str(path))
+
+    return {
+        "text": md_text,
+        "metadata": {
+            "source": path.name,
+            "format": "pdf",
+        }
+    }
+</code></pre>
+<pre><code class="language-python"># 사용 예
+doc = load_pdf("docs/report.pdf")
+print(doc["text"][:300])
+# 깔끔한 마크다운 형태로 출력됩니다:
+# # Quarterly Report
+#
+# ## Revenue
+#
+# | Quarter | Amount |
+# |---------|--------|
+# | Q1      | $1.2M  |
+# | Q2      | $1.5M  |
+</code></pre>
+<h2 id="통합-로더-파일-확장자로-자동-선택"><a class="header" href="#통합-로더-파일-확장자로-자동-선택">통합 로더: 파일 확장자로 자동 선택</a></h2>
+<p>파일 확장자를 보고 적절한 로더를 자동으로 선택하는 함수입니다:</p>
+<pre><code class="language-python">def load_document(file_path: str) -&gt; dict:
+    """Load a document based on its file extension.
+
+    Supported formats: .txt, .md, .pdf
+    """
+    path = Path(file_path)
+    ext = path.suffix.lower()
+
+    loaders = {
+        ".txt": load_txt,
+        ".md": load_markdown,
+        ".pdf": load_pdf,
+    }
+
+    loader = loaders.get(ext)
+    if loader is None:
+        raise ValueError(
+            f"Unsupported format: '{ext}'\n"
+            f"Supported formats: {list(loaders.keys())}"
+        )
+
+    return loader(file_path)
+</code></pre>
+<p>이 함수 하나로 어떤 형식이든 같은 방식으로 로딩할 수 있습니다:</p>
+<pre><code class="language-python">doc1 = load_document("docs/guide.md")    # 마크다운 로더 자동 선택
+doc2 = load_document("docs/report.pdf")  # PDF 로더 자동 선택
+doc3 = load_document("docs/notes.txt")   # 텍스트 로더 자동 선택
+</code></pre>
+<h2 id="디렉토리-전체-로딩"><a class="header" href="#디렉토리-전체-로딩">디렉토리 전체 로딩</a></h2>
+<p><code>docs/</code> 폴더에 있는 모든 문서를 한 번에 로딩합니다:</p>
+<pre><code class="language-python">def load_directory(dir_path: str) -&gt; list[dict]:
+    """Load all supported documents from a directory.
+
+    Scans the directory for .txt, .md, .pdf files and loads them all.
+    Returns a list of document dictionaries.
+    """
+    path = Path(dir_path)
+    supported = {".txt", ".md", ".pdf"}
+
+    documents = []
+    for file_path in sorted(path.iterdir()):
+        if file_path.suffix.lower() in supported and file_path.is_file():
+            doc = load_document(str(file_path))
+            char_count = len(doc["text"])
+            documents.append(doc)
+            print(f"  Loaded: {file_path.name} ({char_count:,} chars)")
+
+    print(f"\n  Total: {len(documents)} documents loaded")
+    return documents
+</code></pre>
+<pre><code class="language-python"># 사용 예
+docs = load_directory("docs/")
+#   Loaded: guide.md (3,420 chars)
+#   Loaded: paper.pdf (12,500 chars)
+#   Loaded: notes.txt (890 chars)
+#
+#   Total: 3 documents loaded
+</code></pre>
+<h2 id="메타데이터가-중요한-이유"><a class="header" href="#메타데이터가-중요한-이유">메타데이터가 중요한 이유</a></h2>
+<p>메타데이터 없이 텍스트만 저장하면 어떻게 될까요?</p>
+<pre><code>RAG 답변: "코드 리뷰는 최소 2명이 승인해야 합니다."
+
+메타데이터 없음: 이 정보가 어디서 왔는지 알 수 없음
+메타데이터 있음: (출처: team-rules.md, chunk 3) ← 신뢰할 수 있음!
+</code></pre>
+<p>메타데이터는 <strong>처음부터</strong> 설계해야 합니다. 나중에 “출처를 추가하고 싶다“고 해도, 이미 저장된 벡터에는 메타데이터가 없기 때문에 <strong>전체를 다시 인덱싱</strong>해야 합니다.</p>
+<blockquote>
+<p><strong>교훈</strong>: 인덱싱은 다시 하면 되지만, 설계는 처음에 제대로 해야 합니다.</p>
+</blockquote>
+<h2 id="샘플-문서-만들기"><a class="header" href="#샘플-문서-만들기">샘플 문서 만들기</a></h2>
+<p>튜토리얼을 따라하려면 검색할 문서가 필요합니다. <code>docs/</code> 폴더에 다음과 같은 샘플 문서를 만들어 둡니다:</p>
+<pre><code class="language-bash">mkdir -p docs
+</code></pre>
+<p>실제 프로젝트에서는 샘플 문서가 포함될 예정이지만, 지금은 간단한 텍스트 파일을 만들어 테스트해도 됩니다:</p>
+<pre><code class="language-python"># 샘플 문서 생성 예시
+sample = """# Apple MLX Framework
+
+## 개요
+
+MLX는 Apple이 Apple Silicon을 위해 만든 머신러닝 프레임워크입니다.
+NumPy와 유사한 API를 제공하면서, Apple Silicon의 통합 메모리를 활용합니다.
+
+## 핵심 특징
+
+### 통합 메모리 (Unified Memory)
+
+Apple Silicon은 CPU와 GPU가 같은 메모리를 공유합니다.
+일반적인 시스템에서는 CPU 메모리와 GPU 메모리 사이에 데이터를 복사해야 하지만,
+Apple Silicon에서는 이 복사가 필요 없습니다.
+
+이는 특히 대규모 모델을 실행할 때 큰 이점을 제공합니다.
+128GB 통합 메모리를 가진 Mac Studio에서는 70B 파라미터 모델도 실행할 수 있습니다.
+
+### Lazy Evaluation
+
+MLX는 계산을 즉시 수행하지 않고, 결과가 필요할 때까지 미룹니다.
+이를 통해 불필요한 계산을 피하고, 메모리를 효율적으로 사용합니다.
+"""
+
+Path("docs/mlx-guide.md").write_text(sample, encoding="utf-8")
+</code></pre>
+<h2 id="실습"><a class="header" href="#실습">실습</a></h2>
+<pre><code class="language-python"># 1. 샘플 문서 생성 (위의 코드 실행)
+
+# 2. 문서 로딩
+docs = load_directory("docs/")
+
+# 3. 각 문서 내용 확인
+for doc in docs:
+    print(f"\n{'=' * 50}")
+    print(f"Source: {doc['metadata']['source']}")
+    print(f"Format: {doc['metadata']['format']}")
+    print(f"Length: {len(doc['text']):,} characters")
+    print(f"\nFirst 200 chars:")
+    print(doc['text'][:200])
+</code></pre>
+<h2 id="핵심-정리-2"><a class="header" href="#핵심-정리-2">핵심 정리</a></h2>
+<ol>
+<li>문서 로딩은 파일을 열어서 <strong>깨끗한 텍스트</strong>를 꺼내는 과정이다</li>
+<li><code>.txt</code>는 그대로, <code>.md</code>는 구조 유지, <code>.pdf</code>는 레이아웃 변환이 필요하다</li>
+<li><strong>메타데이터</strong>(파일명, 형식)를 반드시 함께 저장해야 나중에 출처를 표시할 수 있다</li>
+<li>파일 확장자로 로더를 자동 선택하면 어떤 형식이든 같은 방식으로 처리할 수 있다</li>
+</ol>
+<hr>
+<p>이전: <a href="#03-llm-만나기">03. LLM 만나기</a> | 다음: <a href="#05-텍스트-자르기-chunking">05. 텍스트 자르기</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="05-텍스트-자르기-chunking"><a class="header" href="#05-텍스트-자르기-chunking">05. 텍스트 자르기 (Chunking)</a></h1>
+<h2 id="이-단계의-위치-1"><a class="header" href="#이-단계의-위치-1">이 단계의 위치</a></h2>
+<pre><code>                ★ 여기!
+ ① 로딩        ② 청킹          ③ 임베딩         ④ 저장
+┌──────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│ 문서  │ →  │ 텍스트    │ →  │ 벡터     │ →  │ 벡터 DB  │
+│ 파일  │    │ 조각들    │    │ 변환     │    │ 저장     │
+└──────┘    └──────────┘    └──────────┘    └──────────┘
+</code></pre>
+<h2 id="왜-자르는가"><a class="header" href="#왜-자르는가">왜 자르는가?</a></h2>
+<p>도서관 비유로 돌아갑시다.</p>
+<p>학생이 “통합 메모리란?” 이라고 물었을 때, 사서가 어떻게 해야 할까요?</p>
+<p><strong>방법 A</strong>: 책 한 권을 통째로 건네준다</p>
+<ul>
+<li>학생: “이 300페이지 중에서 어디를 봐야 하나요…?”</li>
+<li>시간 낭비, 관련 없는 내용이 대부분</li>
+</ul>
+<p><strong>방법 B</strong>: 관련된 3페이지만 펼쳐준다</p>
+<ul>
+<li>학생: “아, 여기에 딱 나와있네요!”</li>
+<li>정확하고 빠름</li>
+</ul>
+<p>RAG도 마찬가지입니다. 문서 전체를 LLM에 넣는 것은 비효율적입니다:</p>
+<ol>
+<li><strong>LLM 한계</strong> — LLM은 한 번에 처리할 수 있는 텍스트 양이 제한됩니다 (컨텍스트 윈도우)</li>
+<li><strong>검색 정밀도</strong> — 작은 조각이 큰 문서보다 더 정확하게 “관련 있음/없음“을 판별할 수 있습니다</li>
+<li><strong>비용</strong> — 보내는 텍스트가 많을수록 처리 시간과 메모리가 더 듭니다</li>
+</ol>
+<p>그래서 문서를 **적당한 크기의 조각(chunk)**으로 나눕니다.</p>
+<h2 id="종이를-자르는-것처럼"><a class="header" href="#종이를-자르는-것처럼">종이를 자르는 것처럼</a></h2>
+<p>10장짜리 문서를 500자씩 자른다고 생각해보세요.</p>
+<pre><code>전체 문서 (5000자):
+
+"RAG는 검색 증강 생성입니다. ← ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐
+LLM이 답변을 생성할 때,                                   │
+외부 문서에서 관련 정보를                                  │ 조각 1
+먼저 검색한 뒤 그 정보를                                  │ (500자)
+바탕으로 답변합니다..." ← ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
+
+"임베딩은 텍스트를 벡터로 ← ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐
+변환하는 과정입니다.                                      │
+의미가 비슷한 텍스트는                                    │ 조각 2
+비슷한 벡터를 가집니다.                                   │ (500자)
+이 성질 덕분에..." ← ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
+
+...
+</code></pre>
+<h2 id="두-가지-핵심-파라미터"><a class="header" href="#두-가지-핵심-파라미터">두 가지 핵심 파라미터</a></h2>
+<h3 id="chunk_size-조각의-크기"><a class="header" href="#chunk_size-조각의-크기">chunk_size: 조각의 크기</a></h3>
+<p>한 조각의 최대 글자 수입니다.</p>
+<pre><code>chunk_size = 100:  짧은 조각 → 많은 조각 개수
+chunk_size = 500:  적당한 조각 ★ 권장
+chunk_size = 2000: 긴 조각 → 적은 조각 개수
+</code></pre>
+<h3 id="chunk_overlap-겹침-영역"><a class="header" href="#chunk_overlap-겹침-영역">chunk_overlap: 겹침 영역</a></h3>
+<p>인접한 두 조각이 일부 내용을 공유하도록 합니다.</p>
+<p><strong>왜 겹쳐야 하는가?</strong> 문장이 두 조각의 경계에 걸쳐서 잘리면, 의미가 손실됩니다.</p>
+<pre><code>겹침 없이 자르면 (overlap = 0):
+
+조각 1: "...Apple Silicon의 통합 메모"
+조각 2: "리는 CPU와 GPU가 공유합니다..."
+
+→ "통합 메모리"가 두 조각으로 나뉘었습니다!
+  조각 1에서 검색하면 불완전한 정보
+  조각 2에서 검색하면 맥락이 없음
+</code></pre>
+<pre><code>겹침 있게 자르면 (overlap = 50):
+
+조각 1: "...Apple Silicon의 통합 메모리는 CPU와 GPU가"
+                                    ↕ 겹침 영역 (50자)
+조각 2: "통합 메모리는 CPU와 GPU가 공유합니다. 이는..."
+
+→ "통합 메모리"가 양쪽 조각에 모두 포함됩니다!
+  어느 조각을 검색해도 완전한 정보를 얻을 수 있습니다
+</code></pre>
+<h2 id="코드로-구현하기"><a class="header" href="#코드로-구현하기">코드로 구현하기</a></h2>
+<p><code>langchain-text-splitters</code> 패키지를 사용합니다. LangChain 프레임워크 전체가 아니라, 텍스트 분할 기능만 독립적으로 사용합니다.</p>
+<pre><code class="language-python">from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+def chunk_text(
+    text: str,
+    chunk_size: int = 500,
+    chunk_overlap: int = 50,
+) -&gt; list[str]:
+    """Split text into overlapping chunks.
+
+    Uses RecursiveCharacterTextSplitter which tries to split
+    at natural boundaries (paragraphs &gt; lines &gt; sentences &gt; words).
+    """
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        separators=["\n\n", "\n", ". ", " ", ""],
+    )
+
+    chunks = splitter.split_text(text)
+    return chunks
+</code></pre>
+<h3 id="recursivecharactertextsplitter가-하는-일"><a class="header" href="#recursivecharactertextsplitter가-하는-일">RecursiveCharacterTextSplitter가 하는 일</a></h3>
+<p>이 splitter는 텍스트를 <strong>가능한 한 자연스러운 경계</strong>에서 자릅니다.</p>
+<p><code>separators</code> 리스트의 순서대로 시도합니다:</p>
+<pre><code>1차 시도: "\n\n" (빈 줄) → 문단 단위로 나누기
+   조각이 chunk_size 이하면 OK!
+   아직 크면 ↓
+
+2차 시도: "\n" (줄바꿈) → 줄 단위로 나누기
+   조각이 chunk_size 이하면 OK!
+   아직 크면 ↓
+
+3차 시도: ". " (마침표+공백) → 문장 단위로 나누기
+   조각이 chunk_size 이하면 OK!
+   아직 크면 ↓
+
+4차 시도: " " (공백) → 단어 단위로 나누기
+   최후의 수단
+</code></pre>
+<p>예시:</p>
+<pre><code class="language-python">text = """첫 번째 문단입니다. 이 문단은 짧습니다.
+
+두 번째 문단입니다. 이 문단은 조금 더 길어서 여러 문장을 포함합니다.
+중요한 내용이 여기에 있습니다. 그리고 더 많은 설명이 이어집니다.
+
+세 번째 문단입니다."""
+
+chunks = chunk_text(text, chunk_size=100, chunk_overlap=20)
+for i, chunk in enumerate(chunks):
+    print(f"[Chunk {i}] ({len(chunk)} chars): {chunk}")
+</code></pre>
+<h2 id="메타데이터-보존"><a class="header" href="#메타데이터-보존">메타데이터 보존</a></h2>
+<p>조각을 만들 때 <strong>이 조각이 어디서 왔는지</strong> 정보를 함께 저장해야 합니다.</p>
+<pre><code class="language-python">def chunk_document(
+    doc: dict,
+    chunk_size: int = 500,
+    chunk_overlap: int = 50,
+) -&gt; list[dict]:
+    """Chunk a document and preserve source metadata.
+
+    Each chunk carries:
+    - The original document's metadata (source filename, format)
+    - Its own position info (chunk_index, chunk_total)
+    """
+    text_chunks = chunk_text(doc["text"], chunk_size, chunk_overlap)
+
+    chunks = []
+    for i, text in enumerate(text_chunks):
+        chunks.append({
+            "text": text,
+            "metadata": {
+                **doc["metadata"],            # source, format, title...
+                "chunk_index": i,             # 이 조각의 순서
+                "chunk_total": len(text_chunks),  # 전체 조각 수
+            }
+        })
+
+    return chunks
+</code></pre>
+<p>나중에 RAG 답변에서 이렇게 사용됩니다:</p>
+<pre><code>답변: "Apple Silicon의 통합 메모리는 CPU와 GPU가 같은 메모리를 공유합니다."
+출처: mlx-guide.md, chunk 3/8
+</code></pre>
+<h2 id="chunk_size-선택-가이드"><a class="header" href="#chunk_size-선택-가이드">chunk_size 선택 가이드</a></h2>
+<p>어떤 크기가 좋을까요? 상황마다 다르지만, 직관적으로 이해할 수 있습니다:</p>
+<h3 id="너무-작으면-chunk_size--100"><a class="header" href="#너무-작으면-chunk_size--100">너무 작으면 (chunk_size = 100)</a></h3>
+<pre><code>조각: "통합 메모리는 CPU와 GPU가 같은 메모리를 공유합니다."
+
+→ 이것만 보면: 무엇의 통합 메모리? 어떤 맥락?
+→ 검색은 잘 되지만, LLM에게 주기엔 맥락이 부족
+</code></pre>
+<h3 id="너무-크면-chunk_size--2000"><a class="header" href="#너무-크면-chunk_size--2000">너무 크면 (chunk_size = 2000)</a></h3>
+<pre><code>조각: "MLX 소개... [500자] ...통합 메모리 설명... [500자]
+       ...설치 방법... [500자] ...코드 예제... [500자]"
+
+→ 모든 내용이 다 들어있지만, "통합 메모리"를 물어봤는데
+   설치 방법, 코드 예제까지 딸려옴
+→ 검색 정밀도가 떨어짐
+</code></pre>
+<h3 id="적당하면-chunk_size--500"><a class="header" href="#적당하면-chunk_size--500">적당하면 (chunk_size = 500)</a></h3>
+<pre><code>조각: "MLX의 핵심 특징은 통합 메모리입니다.
+       Apple Silicon은 CPU와 GPU가 같은 메모리를 공유합니다.
+       일반 시스템에서는 데이터를 복사해야 하지만,
+       Apple Silicon에서는 이 복사가 필요 없어 대규모 모델
+       실행에 유리합니다."
+
+→ 충분한 맥락 + 집중된 내용
+→ 검색도 잘 되고, LLM이 이해하기도 좋음
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>chunk_size</th><th>장점</th><th>단점</th><th>적합한 경우</th></tr>
+</thead>
+<tbody>
+<tr><td>100-200</td><td>정밀한 검색</td><td>맥락 부족</td><td>짧은 FAQ</td></tr>
+<tr><td>400-600</td><td>균형</td><td>-</td><td><strong>대부분의 경우 (권장)</strong></td></tr>
+<tr><td>1000-2000</td><td>풍부한 맥락</td><td>검색 정밀도 낮음</td><td>긴 논문</td></tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p><strong>시작은 500으로.</strong> 결과를 보면서 조정하세요.</p>
+</blockquote>
+<h2 id="한국어-청킹-주의사항"><a class="header" href="#한국어-청킹-주의사항">한국어 청킹 주의사항</a></h2>
+<p>한국어는 영어와 특성이 다릅니다:</p>
+<h3 id="1-토큰-수의-차이"><a class="header" href="#1-토큰-수의-차이">1. 토큰 수의 차이</a></h3>
+<p>같은 의미를 표현해도 한국어가 더 많은 토큰을 소비합니다:</p>
+<pre><code>영어: "The unified memory architecture"     →  약 5 tokens
+한국어: "통합 메모리 아키텍처"                  →  약 10 tokens
+</code></pre>
+<p>이 때문에 한국어 문서는 같은 chunk_size에서 실제로 담기는 <strong>의미의 양</strong>이 적습니다.</p>
+<blockquote>
+<p><strong>팁</strong>: 한국어 문서가 많다면 <code>chunk_size</code>를 600-800으로 약간 늘려보세요.</p>
+</blockquote>
+<h3 id="2-문장-경계"><a class="header" href="#2-문장-경계">2. 문장 경계</a></h3>
+<p>영어는 마침표(<code>.</code>)로 문장이 끝나지만, 한국어는 <code>다.</code>, <code>요.</code>, <code>죠.</code>, <code>까?</code> 등 다양하게 끝납니다. <code>RecursiveCharacterTextSplitter</code>의 <code>. </code> 기준만으로는 한국어 문장 경계를 완벽히 잡지 못할 수 있습니다.</p>
+<h2 id="전체-파이프라인-로딩--청킹"><a class="header" href="#전체-파이프라인-로딩--청킹">전체 파이프라인: 로딩 → 청킹</a></h2>
+<p>지금까지 배운 것을 연결합니다:</p>
+<pre><code class="language-python">def load_and_chunk_directory(
+    dir_path: str,
+    chunk_size: int = 500,
+    chunk_overlap: int = 50,
+) -&gt; list[dict]:
+    """Load all documents and split into chunks.
+
+    This is the complete ingestion pipeline up to chunking:
+    Files → Text → Chunks (with metadata)
+    """
+    # Step 1: Load all documents
+    docs = load_directory(dir_path)
+
+    # Step 2: Chunk each document
+    all_chunks = []
+    for doc in docs:
+        chunks = chunk_document(doc, chunk_size, chunk_overlap)
+        all_chunks.extend(chunks)
+        print(f"  {doc['metadata']['source']}: {len(chunks)} chunks")
+
+    print(f"\n  Total: {len(all_chunks)} chunks from {len(docs)} documents")
+    return all_chunks
+</code></pre>
+<pre><code class="language-python"># 실행 예
+chunks = load_and_chunk_directory("docs/", chunk_size=500, chunk_overlap=50)
+
+#   Loaded: mlx-guide.md (2,340 chars)
+#   Loaded: notes.txt (890 chars)
+#
+#   Total: 2 documents loaded
+#   mlx-guide.md: 6 chunks
+#   notes.txt: 2 chunks
+#
+#   Total: 8 chunks from 2 documents
+</code></pre>
+<h2 id="실습-청킹-결과-관찰하기"><a class="header" href="#실습-청킹-결과-관찰하기">실습: 청킹 결과 관찰하기</a></h2>
+<pre><code class="language-python">chunks = load_and_chunk_directory("docs/", chunk_size=500, chunk_overlap=50)
+
+# 각 조각의 내용과 메타데이터 확인
+for i, chunk in enumerate(chunks[:5]):  # 처음 5개만
+    print(f"\n{'=' * 50}")
+    print(f"Chunk {i}")
+    print(f"  Source: {chunk['metadata']['source']}")
+    print(f"  Index:  {chunk['metadata']['chunk_index']} / {chunk['metadata']['chunk_total']}")
+    print(f"  Length: {len(chunk['text'])} chars")
+    print(f"  Text:   {chunk['text'][:150]}...")
+</code></pre>
+<p>다양한 chunk_size로 바꿔보며 결과가 어떻게 달라지는지 관찰해보세요:</p>
+<pre><code class="language-python"># chunk_size를 바꿔보세요
+for size in [200, 500, 1000]:
+    chunks = load_and_chunk_directory("docs/", chunk_size=size)
+    print(f"  chunk_size={size}: {len(chunks)} chunks\n")
+</code></pre>
+<h2 id="핵심-정리-3"><a class="header" href="#핵심-정리-3">핵심 정리</a></h2>
+<ol>
+<li>문서를 **작은 조각(chunk)**으로 나눠야 검색 정밀도가 높아진다</li>
+<li><strong>chunk_size</strong>는 조각의 크기, <strong>chunk_overlap</strong>은 겹침 영역이다</li>
+<li>겹침이 없으면 <strong>문장이 잘려서</strong> 의미가 손실될 수 있다</li>
+<li><code>RecursiveCharacterTextSplitter</code>는 문단 → 줄 → 문장 → 단어 순으로 자연스러운 경계에서 자른다</li>
+<li>각 조각에 <strong>메타데이터</strong>(출처, 순서)를 반드시 보존해야 한다</li>
+<li>시작은 <strong>chunk_size=500, overlap=50</strong>으로</li>
+</ol>
+<hr>
+<p>이전: <a href="#04-문서-준비와-로딩">04. 문서 준비</a> | 다음: <a href="#06-의미를-숫자로-embedding">06. 의미를 숫자로</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="06-의미를-숫자로-embedding"><a class="header" href="#06-의미를-숫자로-embedding">06. 의미를 숫자로 (Embedding)</a></h1>
+<h2 id="이-단계의-위치-2"><a class="header" href="#이-단계의-위치-2">이 단계의 위치</a></h2>
+<pre><code>                               ★ 여기!
+ ① 로딩        ② 청킹          ③ 임베딩         ④ 저장
+┌──────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│ 문서  │ →  │ 텍스트    │ →  │ 벡터     │ →  │ 벡터 DB  │
+│ 파일  │    │ 조각들    │    │ 변환     │    │ 저장     │
+└──────┘    └──────────┘    └──────────┘    └──────────┘
+</code></pre>
+<p>임베딩은 RAG에서 <strong>가장 핵심적인 개념</strong>입니다. 이 단계를 이해하면 RAG의 “검색이 어떻게 작동하는지“가 완전히 이해됩니다.</p>
+<h2 id="컴퓨터는-텍스트를-모른다"><a class="header" href="#컴퓨터는-텍스트를-모른다">컴퓨터는 텍스트를 모른다</a></h2>
+<p>인간은 텍스트를 읽으면 의미를 바로 이해합니다:</p>
+<ul>
+<li>“고양이가 소파에 앉아 있다” — 아, 고양이가 소파 위에 있구나</li>
+<li>“강아지가 침대에 누워 있다” — 비슷한 상황이네</li>
+</ul>
+<p>하지만 컴퓨터에게 텍스트는 그냥 <strong>글자의 나열</strong>입니다. “고양이“와 “강아지“가 비슷한 개념이라는 것을 모릅니다.</p>
+<p>그래서 텍스트의 <strong>의미</strong>를 컴퓨터가 이해할 수 있는 <strong>숫자</strong>로 변환해야 합니다.</p>
+<h2 id="벡터란-지도-좌표-비유"><a class="header" href="#벡터란-지도-좌표-비유">벡터란? (지도 좌표 비유)</a></h2>
+<p>벡터(vector)를 가장 쉽게 이해하는 방법은 <strong>지도의 좌표</strong>를 떠올리는 것입니다.</p>
+<h3 id="2차원-좌표"><a class="header" href="#2차원-좌표">2차원 좌표</a></h3>
+<p>서울의 식당들을 좌표로 표시한다고 생각해보세요:</p>
+<pre><code>맛 (y축)
+  │
+  │        ★ 고급 한식당
+  │
+  │   ★ 동네 한식당
+  │
+  │                    ★ 고급 이탈리안
+  │
+  │              ★ 동네 피자집
+  │
+  └──────────────────────── 가격 (x축)
+     저렴                    비쌈
+</code></pre>
+<p>이 좌표에서:</p>
+<ul>
+<li><strong>가까운 점</strong> = 비슷한 식당 (동네 한식당 ↔ 동네 피자집)</li>
+<li><strong>먼 점</strong> = 다른 식당 (동네 피자집 ↔ 고급 한식당)</li>
+</ul>
+<h3 id="텍스트도-마찬가지"><a class="header" href="#텍스트도-마찬가지">텍스트도 마찬가지</a></h3>
+<p>텍스트의 “의미“를 좌표(벡터)로 표현합니다. 단, 2차원이 아니라 <strong>1024차원</strong>입니다.</p>
+<pre><code>2차원 좌표: (3.5, 7.2)                  ← 2개의 숫자
+텍스트 벡터: (0.12, -0.34, 0.56, ..., 0.78)  ← 1024개의 숫자
+</code></pre>
+<p>1024개의 숫자가 텍스트의 다양한 의미적 측면을 표현합니다. 사람이 각 차원이 무엇을 뜻하는지 해석하기는 어렵지만, 핵심 원리는 같습니다:</p>
+<p><strong>의미가 비슷한 텍스트 → 비슷한 벡터 → 벡터 공간에서 가까운 위치</strong></p>
+<pre><code>"고양이가 소파에 앉아 있다"  → [0.82, -0.15, 0.43, ..., 0.67]
+"강아지가 침대에 누워 있다"  → [0.79, -0.18, 0.41, ..., 0.64]  ← 가까움!
+"주식 시장이 폭락했다"      → [-0.23, 0.91, -0.56, ..., 0.12] ← 멀다!
+</code></pre>
+<h2 id="임베딩-모델이란"><a class="header" href="#임베딩-모델이란">임베딩 모델이란?</a></h2>
+<p>텍스트를 벡터로 변환해주는 AI 모델입니다. 수억 개의 텍스트를 학습하여 “비슷한 의미의 텍스트는 비슷한 벡터를 만들도록” 훈련되었습니다.</p>
+<pre><code>              임베딩 모델
+"MLX는 빠르다" ──────→ [0.12, -0.34, 0.56, ..., 0.78]
+</code></pre>
+<h3 id="우리가-사용하는-모델-baaibge-m3"><a class="header" href="#우리가-사용하는-모델-baaibge-m3">우리가 사용하는 모델: BAAI/bge-m3</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>특성</th><th>값</th></tr>
+</thead>
+<tbody>
+<tr><td>이름</td><td>BAAI/bge-m3</td></tr>
+<tr><td>벡터 차원</td><td>1024</td></tr>
+<tr><td>지원 언어</td><td>100개 이상 (한국어 + 영어 포함)</td></tr>
+<tr><td>모델 크기</td><td>~2.3GB</td></tr>
+<tr><td>용도</td><td>텍스트 유사도 검색</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="왜-이-모델인가"><a class="header" href="#왜-이-모델인가">왜 이 모델인가?</a></h3>
+<p><strong>가장 중요한 이유: 한국어를 지원합니다.</strong></p>
+<p>많이 알려진 <code>all-MiniLM-L6-v2</code>는 영어에 최적화되어 있습니다. 이 모델로 한국어를 임베딩하면:</p>
+<pre><code>영어 전용 모델 (all-MiniLM-L6-v2):
+  "고양이가 앉아 있다"  → [0.12, 0.56, ...]
+  "강아지가 누워 있다"  → [0.78, -0.34, ...]  ← 전혀 다른 벡터!
+  → 한국어 의미를 이해하지 못함
+  → 검색 결과가 엉뚱함
+  → 에러가 나지 않기 때문에 원인을 찾기 어려움!
+
+다국어 모델 (bge-m3):
+  "고양이가 앉아 있다"  → [0.82, -0.15, ...]
+  "강아지가 누워 있다"  → [0.79, -0.18, ...]  ← 비슷한 벡터!
+  → 한국어 의미를 정확히 이해
+  → 검색 결과가 정확
+</code></pre>
+<blockquote>
+<p><strong>경고</strong>: 영어 전용 임베딩 모델을 한국어에 쓰면, <strong>에러 없이 조용히 실패</strong>합니다. 벡터는 생성되지만 의미가 없는 벡터입니다. 검색 결과가 엉뚱하게 나와도 왜 그런지 알기 어렵습니다. 한국어 문서를 다룬다면 <strong>반드시</strong> 다국어 모델을 사용하세요.</p>
+</blockquote>
+<h2 id="코드로-임베딩하기"><a class="header" href="#코드로-임베딩하기">코드로 임베딩하기</a></h2>
+<h3 id="기본-사용법"><a class="header" href="#기본-사용법">기본 사용법</a></h3>
+<pre><code class="language-python">from sentence_transformers import SentenceTransformer
+
+# 모델 로딩 (첫 실행 시 ~2.3GB 다운로드)
+embed_model = SentenceTransformer("BAAI/bge-m3")
+
+# 텍스트 하나를 벡터로 변환
+text = "MLX는 Apple Silicon에 최적화된 프레임워크입니다"
+vector = embed_model.encode(text)
+
+print(f"Input text: {text}")
+print(f"Vector shape: {vector.shape}")      # (1024,) → 1024개의 숫자
+print(f"First 5 values: {vector[:5]}")       # [0.023, -0.118, ...]
+print(f"Vector type: {type(vector)}")        # numpy.ndarray
+</code></pre>
+<h3 id="여러-텍스트를-한-번에"><a class="header" href="#여러-텍스트를-한-번에">여러 텍스트를 한 번에</a></h3>
+<pre><code class="language-python">texts = [
+    "Apple Silicon의 통합 메모리",
+    "M4 칩의 성능",
+    "오늘 점심 메뉴",
+]
+
+# 배치로 한 번에 임베딩 (하나씩보다 훨씬 빠름)
+vectors = embed_model.encode(texts)
+
+print(f"Input: {len(texts)} texts")
+print(f"Output: {vectors.shape}")  # (3, 1024) → 3개 텍스트 × 1024차원
+</code></pre>
+<h2 id="코사인-유사도-벡터끼리-비교하기"><a class="header" href="#코사인-유사도-벡터끼리-비교하기">코사인 유사도: 벡터끼리 비교하기</a></h2>
+<p>두 벡터가 얼마나 비슷한지 측정하는 방법이 <strong>코사인 유사도</strong>입니다.</p>
+<h3 id="직관적-이해"><a class="header" href="#직관적-이해">직관적 이해</a></h3>
+<p>두 화살표의 <strong>방향</strong>이 얼마나 같은지를 봅니다.</p>
+<pre><code>같은 방향 (유사도 ≈ 1.0):      반대 방향 (유사도 ≈ -1.0):
+    ↗ ↗                             ↗ ↙
+
+수직 (유사도 ≈ 0.0):
+    ↗
+    ↑
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>코사인 유사도</th><th>의미</th></tr>
+</thead>
+<tbody>
+<tr><td>0.9 ~ 1.0</td><td>거의 같은 의미</td></tr>
+<tr><td>0.7 ~ 0.9</td><td>관련 있는 내용</td></tr>
+<tr><td>0.3 ~ 0.7</td><td>약간의 관련성</td></tr>
+<tr><td>0.0 ~ 0.3</td><td>거의 관련 없음</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="코드로-확인"><a class="header" href="#코드로-확인">코드로 확인</a></h3>
+<pre><code class="language-python">import numpy as np
+
+def cosine_similarity(a, b):
+    """Calculate cosine similarity between two vectors.
+
+    Returns a value between -1 (opposite) and 1 (identical).
+    """
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+</code></pre>
+<pre><code class="language-python"># 세 문장의 유사도 비교
+texts = [
+    "MLX는 Apple Silicon에 최적화된 프레임워크입니다",     # [0] 기준
+    "Apple의 ML 프레임워크는 M4 칩에서 빠르게 동작합니다",  # [1] 비슷한 의미
+    "오늘 서울의 날씨는 맑고 기온은 15도입니다",            # [2] 관련 없음
+]
+
+vectors = embed_model.encode(texts)
+
+# [0] vs [1]: 비슷한 내용
+sim_01 = cosine_similarity(vectors[0], vectors[1])
+print(f"MLX 설명 vs Apple ML: {sim_01:.4f}")    # ~0.85 (높음!)
+
+# [0] vs [2]: 관련 없는 내용
+sim_02 = cosine_similarity(vectors[0], vectors[2])
+print(f"MLX 설명 vs 날씨:     {sim_02:.4f}")    # ~0.15 (낮음!)
+</code></pre>
+<p><strong>이것이 RAG 검색의 원리입니다:</strong></p>
+<ol>
+<li>질문을 벡터로 변환합니다</li>
+<li>저장된 모든 청크 벡터와 코사인 유사도를 계산합니다</li>
+<li>유사도가 가장 높은 청크를 반환합니다</li>
+</ol>
+<h2 id="다국어-임베딩의-신기한-점"><a class="header" href="#다국어-임베딩의-신기한-점">다국어 임베딩의 신기한 점</a></h2>
+<p>bge-m3는 <strong>다른 언어의 같은 의미</strong>도 비슷한 벡터로 변환합니다:</p>
+<pre><code class="language-python">texts = [
+    "MLX는 Apple Silicon에 최적화되어 있습니다",                # 한국어
+    "MLX is optimized for Apple Silicon",                     # 영어 (같은 의미)
+    "오늘 비가 올 예정입니다",                                  # 한국어 (다른 의미)
+]
+
+vectors = embed_model.encode(texts)
+
+sim_same_meaning = cosine_similarity(vectors[0], vectors[1])  # 한↔영 같은 의미
+sim_diff_meaning = cosine_similarity(vectors[0], vectors[2])  # 한↔한 다른 의미
+
+print(f"한국어 vs 영어 (같은 의미): {sim_same_meaning:.4f}")  # ~0.90 (매우 높음!)
+print(f"한국어 vs 한국어 (다른 의미): {sim_diff_meaning:.4f}")  # ~0.15 (낮음)
+</code></pre>
+<p>한국어로 질문해도 영어 문서에서 관련 내용을 찾을 수 있고, 그 반대도 가능합니다!</p>
+<h2 id="청크-임베딩하기"><a class="header" href="#청크-임베딩하기">청크 임베딩하기</a></h2>
+<p>이전 단계에서 만든 청크들을 벡터로 변환합니다:</p>
+<pre><code class="language-python">def embed_chunks(
+    chunks: list[dict],
+    model: SentenceTransformer,
+) -&gt; list[dict]:
+    """Add embedding vectors to chunks.
+
+    Takes chunks from chunk_document() and adds an 'embedding' field
+    to each chunk dictionary.
+    """
+    # Extract texts for batch encoding
+    texts = [chunk["text"] for chunk in chunks]
+
+    # Batch encoding is much faster than one-by-one
+    vectors = model.encode(texts, show_progress_bar=True)
+
+    # Attach vectors to chunks
+    for chunk, vector in zip(chunks, vectors):
+        chunk["embedding"] = vector
+
+    print(f"  Embedded {len(chunks)} chunks (dim={vectors.shape[1]})")
+    return chunks
+</code></pre>
+<pre><code class="language-python"># 사용 예
+embed_model = SentenceTransformer("BAAI/bge-m3")
+chunks = load_and_chunk_directory("docs/")
+chunks = embed_chunks(chunks, embed_model)
+
+# 확인
+print(f"Chunk 0 text: {chunks[0]['text'][:80]}...")
+print(f"Chunk 0 vector: {chunks[0]['embedding'][:5]}...")  # 첫 5개 숫자
+print(f"Chunk 0 vector shape: {chunks[0]['embedding'].shape}")  # (1024,)
+</code></pre>
+<h2 id="메모리-관리"><a class="header" href="#메모리-관리">메모리 관리</a></h2>
+<p>임베딩 모델은 약 2.3GB의 메모리를 사용합니다. Qwen 모델(~4.5GB)과 동시에 로딩하면 ~7GB가 됩니다.</p>
+<p>128GB Mac에서는 문제없지만, 메모리가 적은 시스템에서는 순차적으로 사용해야 합니다:</p>
+<pre><code class="language-python">import gc
+import mlx.core as mx
+
+# 1. 임베딩 수행
+embed_model = SentenceTransformer("BAAI/bge-m3")
+chunks = embed_chunks(chunks, embed_model)
+
+# 2. 임베딩 모델 해제 (메모리 절약)
+del embed_model
+gc.collect()
+mx.metal.clear_cache()
+
+# 3. 이제 LLM 로딩 가능
+from mlx_lm import load
+model, tokenizer = load("mlx-community/Qwen2.5-7B-Instruct-4bit")
+</code></pre>
+<h2 id="실습-임베딩의-힘-느껴보기"><a class="header" href="#실습-임베딩의-힘-느껴보기">실습: 임베딩의 힘 느껴보기</a></h2>
+<pre><code class="language-python">from sentence_transformers import SentenceTransformer
+import numpy as np
+
+model = SentenceTransformer("BAAI/bge-m3")
+
+# 질문과 여러 청크의 유사도를 비교합니다
+query = "Apple Silicon의 통합 메모리란?"
+
+chunk_texts = [
+    "Apple Silicon은 CPU와 GPU가 같은 메모리를 공유합니다. 이를 통합 메모리라고 합니다.",
+    "MLX는 lazy evaluation을 사용하여 계산을 미루고 메모리를 절약합니다.",
+    "Python 3.11은 CPython의 속도를 10-60% 향상시켰습니다.",
+    "ChromaDB는 로컬에서 실행되는 벡터 데이터베이스입니다.",
+]
+
+# 질문과 청크를 모두 임베딩
+all_texts = [query] + chunk_texts
+vectors = model.encode(all_texts)
+query_vec = vectors[0]
+
+# 각 청크와 질문의 유사도 계산
+print(f"Query: {query}\n")
+for i, text in enumerate(chunk_texts):
+    sim = np.dot(query_vec, vectors[i+1]) / (
+        np.linalg.norm(query_vec) * np.linalg.norm(vectors[i+1])
+    )
+    bar = "█" * int(sim * 30)
+    print(f"  [{sim:.3f}] {bar}")
+    print(f"  {text[:60]}...")
+    print()
+</code></pre>
+<p>첫 번째 청크(통합 메모리 설명)의 유사도가 가장 높게 나올 것입니다. 이것이 RAG 검색이 작동하는 원리입니다!</p>
+<h2 id="핵심-정리-4"><a class="header" href="#핵심-정리-4">핵심 정리</a></h2>
+<ol>
+<li><strong>임베딩</strong> = 텍스트의 의미를 숫자 벡터로 변환하는 것</li>
+<li>의미가 비슷한 텍스트 → 비슷한 벡터 → 벡터 공간에서 <strong>가까운 위치</strong></li>
+<li><strong>코사인 유사도</strong>로 두 벡터의 비슷함을 측정 (1에 가까울수록 비슷)</li>
+<li>한국어 문서에는 반드시 <strong>다국어 모델</strong> (bge-m3) 사용</li>
+<li>영어 전용 모델을 한국어에 쓰면 <strong>에러 없이 조용히 실패</strong> — 가장 위험한 함정</li>
+<li>배치(batch)로 임베딩하면 하나씩보다 훨씬 빠르다</li>
+</ol>
+<hr>
+<p>이전: <a href="#05-텍스트-자르기-chunking">05. 텍스트 자르기</a> | 다음: <a href="#07-벡터-저장소-vector-store">07. 벡터 저장소</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="07-벡터-저장소-vector-store"><a class="header" href="#07-벡터-저장소-vector-store">07. 벡터 저장소 (Vector Store)</a></h1>
+<h2 id="이-단계의-위치-3"><a class="header" href="#이-단계의-위치-3">이 단계의 위치</a></h2>
+<pre><code>                                              ★ 여기!
+ ① 로딩        ② 청킹          ③ 임베딩         ④ 저장
+┌──────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│ 문서  │ →  │ 텍스트    │ →  │ 벡터     │ →  │ 벡터 DB  │
+│ 파일  │    │ 조각들    │    │ 변환     │    │ 저장     │
+└──────┘    └──────────┘    └──────────┘    └──────────┘
+</code></pre>
+<p>임베딩으로 만든 벡터를 <strong>저장</strong>하고, 나중에 비슷한 벡터를 <strong>빠르게 찾을</strong> 수 있게 하는 단계입니다.</p>
+<h2 id="왜-별도의-데이터베이스가-필요한가"><a class="header" href="#왜-별도의-데이터베이스가-필요한가">왜 별도의 데이터베이스가 필요한가?</a></h2>
+<h3 id="일반-데이터베이스-vs-벡터-데이터베이스"><a class="header" href="#일반-데이터베이스-vs-벡터-데이터베이스">일반 데이터베이스 vs 벡터 데이터베이스</a></h3>
+<p>일반 데이터베이스(MySQL, PostgreSQL)는 <strong>정확한 일치</strong>로 검색합니다:</p>
+<pre><code class="language-sql">-- "정확히 이 제목인 문서를 찾아줘"
+SELECT * FROM docs WHERE title = 'MLX Guide'
+</code></pre>
+<p>하지만 RAG에서는 <strong>의미적 유사성</strong>으로 검색해야 합니다:</p>
+<pre><code>-- "MLX의 장점과 비슷한 의미를 가진 문서 조각을 찾아줘"
+-- 이건 SQL로는 불가능합니다!
+</code></pre>
+<p>벡터 데이터베이스는 “이 벡터와 가장 가까운 벡터를 찾아줘“라는 질문에 답할 수 있습니다.</p>
+<h3 id="비유-도서관의-서가-정리"><a class="header" href="#비유-도서관의-서가-정리">비유: 도서관의 서가 정리</a></h3>
+<p>사서가 색인 카드를 정리할 때:</p>
+<ul>
+<li><strong>일반 서가</strong>: 가나다 순, 날짜 순 — 정확한 제목을 알아야 찾을 수 있음</li>
+<li><strong>벡터 서가</strong>: 비슷한 내용끼리 가까운 서랍에 — “이것과 비슷한 내용“으로 찾을 수 있음</li>
+</ul>
+<h2 id="chromadb-우리의-벡터-저장소"><a class="header" href="#chromadb-우리의-벡터-저장소">ChromaDB: 우리의 벡터 저장소</a></h2>
+<p>이 프로젝트에서는 <strong>ChromaDB</strong>를 사용합니다.</p>
+<h3 id="왜-chromadb인가"><a class="header" href="#왜-chromadb인가">왜 ChromaDB인가?</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>특성</th><th>ChromaDB</th><th>다른 옵션</th></tr>
+</thead>
+<tbody>
+<tr><td>서버 필요?</td><td>X — Python 안에서 바로 실행</td><td>Pinecone, Weaviate: 서버 필요</td></tr>
+<tr><td>설치</td><td><code>pip install chromadb</code> 끝</td><td>일부는 Docker 필요</td></tr>
+<tr><td>데이터 저장</td><td>디스크에 자동 저장</td><td>FAISS: 수동 저장/로드</td></tr>
+<tr><td>메타데이터 검색</td><td>지원</td><td>FAISS: 미지원</td></tr>
+<tr><td>학습 비용</td><td>매우 낮음</td><td>다양</td></tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p>ChromaDB는 “파일 하나 열듯이” 쓸 수 있는 벡터 DB입니다. 서버를 띄울 필요 없고, 프로그램을 종료해도 데이터가 디스크에 남습니다.</p>
+</blockquote>
+<h3 id="chromadb의-핵심-개념"><a class="header" href="#chromadb의-핵심-개념">ChromaDB의 핵심 개념</a></h3>
+<pre><code>ChromaDB Client
+  └── Collection (컬렉션) = 테이블
+        └── 문서 하나하나 = 행
+              ├── id:        고유 식별자
+              ├── embedding: 벡터
+              ├── document:  원본 텍스트
+              └── metadata:  메타데이터 (출처, 형식 등)
+</code></pre>
+<ul>
+<li><strong>Client</strong>: ChromaDB에 연결하는 객체</li>
+<li><strong>Collection</strong>: 벡터들의 모음 (일반 DB의 “테이블“에 해당)</li>
+<li><strong>Document</strong>: 하나의 청크 (벡터 + 텍스트 + 메타데이터)</li>
+</ul>
+<h2 id="코드로-사용하기"><a class="header" href="#코드로-사용하기">코드로 사용하기</a></h2>
+<h3 id="1-클라이언트-생성"><a class="header" href="#1-클라이언트-생성">1. 클라이언트 생성</a></h3>
+<pre><code class="language-python">import chromadb
+
+# PersistentClient = 데이터를 디스크에 저장 (프로그램 종료 후에도 유지)
+client = chromadb.PersistentClient(path="./chroma_db")
+
+# 참고: 테스트용으로 메모리에만 저장하려면:
+# client = chromadb.Client()  # 프로그램 종료 시 데이터 사라짐
+</code></pre>
+<h3 id="2-컬렉션-생성"><a class="header" href="#2-컬렉션-생성">2. 컬렉션 생성</a></h3>
+<pre><code class="language-python"># 컬렉션 만들기 (이미 있으면 가져오기)
+collection = client.get_or_create_collection(
+    name="my_documents",
+    metadata={"hnsw:space": "cosine"},  # 코사인 유사도 사용
+)
+</code></pre>
+<blockquote>
+<p><strong><code>hnsw:space</code>란?</strong> 벡터 간 거리를 계산하는 방식입니다. <code>cosine</code>은 코사인 유사도, <code>l2</code>는 유클리드 거리입니다. 대부분의 임베딩 모델은 코사인 유사도에 맞춰 학습되었으므로 <code>cosine</code>을 사용합니다.</p>
+</blockquote>
+<h3 id="3-벡터-추가"><a class="header" href="#3-벡터-추가">3. 벡터 추가</a></h3>
+<pre><code class="language-python">collection.add(
+    ids=["chunk_0", "chunk_1", "chunk_2"],
+    embeddings=[
+        [0.1, 0.2, 0.3, ...],   # chunk_0의 벡터
+        [0.4, 0.5, 0.6, ...],   # chunk_1의 벡터
+        [0.7, 0.8, 0.9, ...],   # chunk_2의 벡터
+    ],
+    documents=[
+        "MLX는 Apple Silicon에 최적화되어 있습니다.",
+        "통합 메모리를 통해 CPU와 GPU가 같은 메모리를 공유합니다.",
+        "ChromaDB는 로컬 벡터 데이터베이스입니다.",
+    ],
+    metadatas=[
+        {"source": "mlx-guide.md", "chunk_index": 0},
+        {"source": "mlx-guide.md", "chunk_index": 1},
+        {"source": "chromadb-intro.md", "chunk_index": 0},
+    ],
+)
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>매개변수</th><th>역할</th><th>비유</th></tr>
+</thead>
+<tbody>
+<tr><td><code>ids</code></td><td>각 항목의 고유 ID</td><td>색인 카드 번호</td></tr>
+<tr><td><code>embeddings</code></td><td>벡터 (숫자 배열)</td><td>카드의 좌표</td></tr>
+<tr><td><code>documents</code></td><td>원본 텍스트</td><td>카드에 적힌 내용</td></tr>
+<tr><td><code>metadatas</code></td><td>부가 정보</td><td>카드 뒷면 메모 (출처 등)</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="4-유사도-검색"><a class="header" href="#4-유사도-검색">4. 유사도 검색</a></h3>
+<pre><code class="language-python">results = collection.query(
+    query_embeddings=[query_vector],   # 질문의 벡터
+    n_results=3,                       # 상위 3개 반환
+    include=["documents", "metadatas", "distances"],
+)
+</code></pre>
+<p>결과 구조:</p>
+<pre><code class="language-python"># results는 딕셔너리입니다
+results["documents"][0]   # ["텍스트1", "텍스트2", "텍스트3"]
+results["metadatas"][0]   # [{"source": "guide.md", ...}, ...]
+results["distances"][0]   # [0.12, 0.34, 0.67]  ← 거리 (낮을수록 비슷)
+</code></pre>
+<blockquote>
+<p><strong>주의: distance vs similarity</strong></p>
+<ul>
+<li>코사인 <strong>유사도</strong>(similarity): 높을수록 비슷 (1.0 = 동일)</li>
+<li>ChromaDB의 <strong>거리</strong>(distance): <strong>낮을수록</strong> 비슷 (0.0 = 동일)</li>
+<li>관계: <code>distance = 1 - similarity</code></li>
+</ul>
+</blockquote>
+<h3 id="distance-값-해석"><a class="header" href="#distance-값-해석">distance 값 해석</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>distance</th><th>의미</th><th>설명</th></tr>
+</thead>
+<tbody>
+<tr><td>0.0 ~ 0.2</td><td>매우 유사</td><td>거의 같은 내용</td></tr>
+<tr><td>0.2 ~ 0.5</td><td>관련 있음</td><td>같은 주제의 다른 측면</td></tr>
+<tr><td>0.5 ~ 0.8</td><td>약한 관련</td><td>간접적으로 관련</td></tr>
+<tr><td>0.8 ~ 1.0</td><td>관련 없음</td><td>다른 주제</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="전체-저장-함수"><a class="header" href="#전체-저장-함수">전체 저장 함수</a></h2>
+<p>이전 단계의 임베딩된 청크를 ChromaDB에 저장합니다:</p>
+<pre><code class="language-python">import chromadb
+
+def store_chunks(
+    chunks: list[dict],
+    db_path: str = "./chroma_db",
+    collection_name: str = "my_documents",
+) -&gt; chromadb.Collection:
+    """Store embedded chunks in ChromaDB.
+
+    Each chunk must have 'text', 'metadata', and 'embedding' fields.
+    Returns the ChromaDB collection for later querying.
+    """
+    client = chromadb.PersistentClient(path=db_path)
+
+    # Delete existing collection if re-indexing
+    try:
+        client.delete_collection(collection_name)
+    except ValueError:
+        pass  # Collection doesn't exist yet
+
+    collection = client.get_or_create_collection(
+        name=collection_name,
+        metadata={"hnsw:space": "cosine"},
+    )
+
+    # Prepare batch data
+    ids = []
+    embeddings = []
+    documents = []
+    metadatas = []
+
+    for i, chunk in enumerate(chunks):
+        # Create unique ID: "filename_chunkindex"
+        source = chunk["metadata"].get("source", "unknown")
+        idx = chunk["metadata"].get("chunk_index", i)
+        chunk_id = f"{source}_{idx}"
+
+        ids.append(chunk_id)
+        embeddings.append(chunk["embedding"].tolist())  # numpy → list
+        documents.append(chunk["text"])
+
+        # ChromaDB metadata must be str, int, float, or bool
+        clean_meta = {
+            k: v for k, v in chunk["metadata"].items()
+            if isinstance(v, (str, int, float, bool))
+        }
+        metadatas.append(clean_meta)
+
+    # Add all at once
+    collection.add(
+        ids=ids,
+        embeddings=embeddings,
+        documents=documents,
+        metadatas=metadatas,
+    )
+
+    print(f"  Stored {len(chunks)} chunks in '{collection_name}'")
+    print(f"  Database path: {db_path}")
+    return collection
+</code></pre>
+<h2 id="컬렉션-관리"><a class="header" href="#컬렉션-관리">컬렉션 관리</a></h2>
+<pre><code class="language-python"># 저장된 청크 수 확인
+print(f"Total chunks: {collection.count()}")
+
+# 컬렉션 삭제 (재인덱싱할 때)
+client.delete_collection("my_documents")
+
+# 특정 문서의 청크만 삭제
+collection.delete(
+    where={"source": "old_document.md"}
+)
+
+# 특정 문서에서만 검색
+results = collection.query(
+    query_embeddings=[query_vec],
+    n_results=3,
+    where={"source": "mlx-guide.md"},  # mlx-guide.md 내에서만 검색
+)
+</code></pre>
+<h2 id="전체-인덱싱-파이프라인"><a class="header" href="#전체-인덱싱-파이프라인">전체 인덱싱 파이프라인</a></h2>
+<p>지금까지 배운 모든 단계를 연결합니다:</p>
+<pre><code class="language-python">from sentence_transformers import SentenceTransformer
+
+# === 전체 인덱싱 파이프라인 ===
+
+# 1. 문서 로딩 + 청킹
+print("Step 1: Loading and chunking documents...")
+chunks = load_and_chunk_directory("docs/", chunk_size=500, chunk_overlap=50)
+
+# 2. 임베딩
+print("\nStep 2: Embedding chunks...")
+embed_model = SentenceTransformer("BAAI/bge-m3")
+chunks = embed_chunks(chunks, embed_model)
+
+# 3. ChromaDB에 저장
+print("\nStep 3: Storing in ChromaDB...")
+collection = store_chunks(chunks)
+
+print(f"\nDone! {collection.count()} chunks indexed and ready for search.")
+</code></pre>
+<pre><code>Step 1: Loading and chunking documents...
+  Loaded: mlx-guide.md (2,340 chars)
+  Loaded: notes.txt (890 chars)
+  Total: 2 documents loaded
+  mlx-guide.md: 6 chunks
+  notes.txt: 2 chunks
+  Total: 8 chunks from 2 documents
+
+Step 2: Embedding chunks...
+  Embedded 8 chunks (dim=1024)
+
+Step 3: Storing in ChromaDB...
+  Stored 8 chunks in 'my_documents'
+  Database path: ./chroma_db
+
+Done! 8 chunks indexed and ready for search.
+</code></pre>
+<p>이 과정은 <strong>한 번만</strong> 하면 됩니다. <code>./chroma_db/</code> 폴더에 데이터가 저장되므로, 프로그램을 종료해도 데이터가 유지됩니다.</p>
+<h2 id="실습-1"><a class="header" href="#실습-1">실습</a></h2>
+<pre><code class="language-python"># 1. 인덱싱 실행 (위 코드)
+
+# 2. 테스트 검색
+query = "통합 메모리란?"
+query_vec = embed_model.encode(query).tolist()
+
+results = collection.query(
+    query_embeddings=[query_vec],
+    n_results=3,
+    include=["documents", "metadatas", "distances"],
+)
+
+print(f"Query: {query}\n")
+for i in range(len(results["documents"][0])):
+    doc = results["documents"][0][i]
+    meta = results["metadatas"][0][i]
+    dist = results["distances"][0][i]
+    print(f"--- Result {i+1} (distance: {dist:.4f}) ---")
+    print(f"Source: {meta['source']}, chunk {meta.get('chunk_index', '?')}")
+    print(f"Text: {doc[:150]}...")
+    print()
+</code></pre>
+<p>검색 결과를 보면서 확인하세요:</p>
+<ul>
+<li>질문과 관련된 청크가 상위에 나오는가?</li>
+<li>distance 값이 낮은(비슷한) 것이 먼저 나오는가?</li>
+<li>출처 정보가 정확한가?</li>
+</ul>
+<h2 id="핵심-정리-5"><a class="header" href="#핵심-정리-5">핵심 정리</a></h2>
+<ol>
+<li><strong>벡터 저장소</strong>는 벡터를 저장하고 비슷한 벡터를 빠르게 찾아주는 특수 DB이다</li>
+<li><strong>ChromaDB</strong>는 설치만 하면 바로 쓸 수 있는 로컬 벡터 DB이다</li>
+<li>각 항목은 <code>id</code> + <code>embedding</code> + <code>document</code> + <code>metadata</code>로 구성된다</li>
+<li>ChromaDB의 distance는 <strong>낮을수록 비슷</strong>하다 (similarity와 반대)</li>
+<li>인덱싱은 <strong>한 번만</strong> 하면 되고, 데이터는 디스크에 영구 저장된다</li>
+</ol>
+<hr>
+<p>이전: <a href="#06-의미를-숫자로-embedding">06. 의미를 숫자로</a> | 다음: <a href="#08-검색하기-retrieval">08. 검색하기</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="08-검색하기-retrieval"><a class="header" href="#08-검색하기-retrieval">08. 검색하기 (Retrieval)</a></h1>
+<h2 id="이-단계의-위치-4"><a class="header" href="#이-단계의-위치-4">이 단계의 위치</a></h2>
+<p>이제 질문 단계(Query Pipeline)로 넘어갑니다!</p>
+<pre><code>═══════════════ 질문 단계 ═══════════════
+
+ ★ 여기!
+ ⑤ 질문임베딩    ⑥ 검색          ⑦ 프롬프트      ⑧ 생성
+┌──────────┐  ┌──────────┐    ┌──────────┐   ┌──────────┐
+│ 질문을    │→ │ 비슷한   │ →  │ 질문 +   │ → │ LLM이    │ → 답변
+│ 벡터로   │  │ 벡터 찾기 │    │ 관련 문서 │   │ 답변 생성 │
+└──────────┘  └──────────┘    └──────────┘   └──────────┘
+</code></pre>
+<p>준비 단계에서 문서를 벡터로 변환하여 ChromaDB에 저장했습니다.
+이제 질문이 들어오면 <strong>관련 있는 조각을 찾아오는</strong> 과정을 배웁니다.</p>
+<h2 id="검색의-원리-복습"><a class="header" href="#검색의-원리-복습">검색의 원리 (복습)</a></h2>
+<p><a href="#06-의미를-숫자로-embedding">06. 임베딩</a>에서 배운 것을 떠올려보세요:</p>
+<ol>
+<li>비슷한 의미의 텍스트는 <strong>비슷한 벡터</strong>를 가진다</li>
+<li>비슷한 벡터는 벡터 공간에서 <strong>가까이</strong> 있다</li>
+<li>코사인 유사도로 <strong>가까운 정도</strong>를 측정한다</li>
+</ol>
+<p>검색은 이 원리를 그대로 활용합니다:</p>
+<pre><code>질문: "Apple Silicon의 통합 메모리란?"
+    ↓ 임베딩
+질문 벡터: [0.45, -0.12, 0.78, ...]
+    ↓ ChromaDB에서 가장 가까운 벡터 찾기
+
+결과:
+  1위: "Apple Silicon은 CPU와 GPU가 같은 메모리를..."  (distance: 0.08)
+  2위: "통합 메모리를 활용하여 데이터 복사 없이..."     (distance: 0.15)
+  3위: "MLX는 Apple Silicon에 최적화된..."             (distance: 0.22)
+</code></pre>
+<h2 id="검색-함수-만들기"><a class="header" href="#검색-함수-만들기">검색 함수 만들기</a></h2>
+<pre><code class="language-python">from sentence_transformers import SentenceTransformer
+import chromadb
+
+class Retriever:
+    """Find relevant document chunks for a query.
+
+    This is the 'librarian' of our RAG system.
+    Given a question, it finds the most relevant document chunks.
+    """
+
+    def __init__(
+        self,
+        embed_model_name: str = "BAAI/bge-m3",
+        db_path: str = "./chroma_db",
+        collection_name: str = "my_documents",
+    ):
+        # Load the same embedding model used during indexing
+        self.embed_model = SentenceTransformer(embed_model_name)
+
+        # Connect to the existing ChromaDB
+        client = chromadb.PersistentClient(path=db_path)
+        self.collection = client.get_collection(collection_name)
+
+        print(f"Retriever ready: {self.collection.count()} chunks indexed")
+
+    def retrieve(self, query: str, top_k: int = 3) -&gt; list[dict]:
+        """Find the top_k most relevant chunks for a query.
+
+        Steps:
+        1. Convert query to vector (same model as indexing!)
+        2. Search ChromaDB for nearest vectors
+        3. Return chunks with text, metadata, and similarity score
+        """
+        # Step 1: Embed the query
+        query_vec = self.embed_model.encode(query).tolist()
+
+        # Step 2: Search
+        results = self.collection.query(
+            query_embeddings=[query_vec],
+            n_results=top_k,
+            include=["documents", "metadatas", "distances"],
+        )
+
+        # Step 3: Format results
+        matches = []
+        for i in range(len(results["documents"][0])):
+            matches.append({
+                "text": results["documents"][0][i],
+                "metadata": results["metadatas"][0][i],
+                "distance": results["distances"][0][i],
+                "rank": i + 1,
+            })
+
+        return matches
+</code></pre>
+<pre><code class="language-python"># 사용 예
+retriever = Retriever()
+results = retriever.retrieve("통합 메모리란?", top_k=3)
+
+for r in results:
+    print(f"[Rank {r['rank']}] distance={r['distance']:.4f}")
+    print(f"  Source: {r['metadata']['source']}")
+    print(f"  Text: {r['text'][:100]}...")
+    print()
+</code></pre>
+<h2 id="top_k-몇-개를-가져올까"><a class="header" href="#top_k-몇-개를-가져올까">top_k: 몇 개를 가져올까?</a></h2>
+<p><code>top_k</code>는 검색할 청크의 수입니다. 이 값에 따라 답변의 품질이 달라집니다.</p>
+<h3 id="비유-사서에게-관련-자료-몇-개-가져다-주세요"><a class="header" href="#비유-사서에게-관련-자료-몇-개-가져다-주세요">비유: 사서에게 “관련 자료 몇 개 가져다 주세요”</a></h3>
+<pre><code>top_k = 1: "가장 관련 있는 페이지 1개만요"
+  → 핵심만 있지만, 중요한 정보를 놓칠 수 있음
+
+top_k = 3: "관련 자료 3개 정도요" ★ 보통 이것이 적당
+  → 충분한 맥락, 관련 없는 것이 섞일 확률 낮음
+
+top_k = 10: "관련될 만한 자료 10개요"
+  → 정보는 많지만, 관련 없는 자료가 섞이기 시작
+  → LLM이 중간의 정보를 무시하는 "Lost in the Middle" 문제 발생
+</code></pre>
+<h3 id="lost-in-the-middle-문제"><a class="header" href="#lost-in-the-middle-문제">“Lost in the Middle” 문제</a></h3>
+<p>LLM은 프롬프트의 <strong>처음과 끝</strong>에 주목하고, <strong>중간을 무시</strong>하는 경향이 있습니다.</p>
+<pre><code>컨텍스트에 10개 청크를 넣으면:
+
+[chunk 1] ← LLM이 잘 읽음
+[chunk 2]
+[chunk 3]
+[chunk 4]
+[chunk 5] ← 여기가 가장 중요한 정보인데... LLM이 놓침!
+[chunk 6]
+[chunk 7]
+[chunk 8]
+[chunk 9]
+[chunk 10] ← LLM이 잘 읽음
+</code></pre>
+<p>이것은 LLM의 알려진 한계입니다. 해결 방법:</p>
+<ul>
+<li><strong>top_k를 3-5로 유지</strong> — 가장 간단하고 효과적</li>
+<li>나중에 고급 기법: 재순위(reranking), 역순 정렬 등</li>
+</ul>
+<blockquote>
+<p><strong>권장</strong>: <code>top_k=3</code>으로 시작하세요.</p>
+</blockquote>
+<h2 id="프롬프트-구성-rag의-핵심"><a class="header" href="#프롬프트-구성-rag의-핵심">프롬프트 구성: RAG의 핵심</a></h2>
+<p>검색된 청크를 질문과 합쳐서 LLM에게 보내는 프롬프트를 만듭니다.</p>
+<p>이것이 RAG의 “Augmented” 부분입니다 — 검색 결과로 LLM의 능력을 <strong>증강</strong>합니다.</p>
+<pre><code class="language-python">def build_rag_prompt(query: str, retrieved_chunks: list[dict]) -&gt; str:
+    """Build a prompt that includes retrieved context.
+
+    This is the heart of RAG: combining the question with
+    relevant document chunks so the LLM can answer based on facts.
+    """
+    # Format each chunk with source information
+    context_parts = []
+    for chunk in retrieved_chunks:
+        source = chunk["metadata"].get("source", "unknown")
+        idx = chunk["metadata"].get("chunk_index", "?")
+        context_parts.append(
+            f"[Source: {source}, Chunk {idx}]\n{chunk['text']}"
+        )
+
+    context = "\n\n---\n\n".join(context_parts)
+
+    prompt = f"""다음 참고 문서를 바탕으로 질문에 답변하세요.
+
+규칙:
+- 참고 문서에 있는 정보만 사용하세요
+- 문서에 없는 내용은 "문서에서 해당 정보를 찾을 수 없습니다"라고 답하세요
+- 답변 끝에 참고한 문서의 출처를 표시하세요
+
+## 참고 문서
+
+{context}
+
+## 질문
+
+{query}
+
+## 답변"""
+
+    return prompt
+</code></pre>
+<h3 id="프롬프트의-각-부분이-하는-일"><a class="header" href="#프롬프트의-각-부분이-하는-일">프롬프트의 각 부분이 하는 일</a></h3>
+<pre><code>┌─────────────────────────────────────────────────┐
+│ "참고 문서를 바탕으로 답변하세요"                    │ ← ① 역할 지정
+│                                                 │
+│ "문서에 없는 내용은 없다고 답하세요"                 │ ← ② 환각 방지
+│                                                 │
+│ "출처를 표시하세요"                                │ ← ③ 출처 추적
+│                                                 │
+│ [검색된 청크 1]                                   │
+│ [검색된 청크 2]                                   │ ← ④ 컨텍스트
+│ [검색된 청크 3]                                   │
+│                                                 │
+│ "질문: MLX의 장점은?"                              │ ← ⑤ 질문
+└─────────────────────────────────────────────────┘
+</code></pre>
+<p>① <strong>역할 지정</strong>: “문서를 참고하라” → 자기 기억 대신 주어진 문서를 사용하도록
+② <strong>환각 방지</strong>: “없으면 없다고 해라” → 지어내기 방지
+③ <strong>출처 추적</strong>: 어떤 청크에서 왔는지 표시
+④ <strong>컨텍스트</strong>: 실제 검색된 문서 조각들
+⑤ <strong>질문</strong>: 사용자의 원래 질문</p>
+<h2 id="프롬프트-시각화"><a class="header" href="#프롬프트-시각화">프롬프트 시각화</a></h2>
+<p>RAG의 가장 큰 장점 중 하나는 <strong>LLM에 무엇이 전달되는지 확인</strong>할 수 있다는 것입니다:</p>
+<pre><code class="language-python">def retrieve_and_show(retriever, query, top_k=3):
+    """Retrieve chunks and display everything the LLM will see.
+
+    This function makes the RAG process transparent:
+    you can see exactly what context the LLM receives.
+    """
+    # Retrieve
+    chunks = retriever.retrieve(query, top_k=top_k)
+
+    # Show retrieved chunks
+    print("=" * 60)
+    print(f"QUERY: {query}")
+    print("=" * 60)
+
+    print("\n📚 RETRIEVED CHUNKS:\n")
+    for chunk in chunks:
+        similarity = 1 - chunk["distance"]  # distance → similarity
+        bar = "█" * int(similarity * 20)
+        print(f"  [{chunk['rank']}] similarity={similarity:.3f} {bar}")
+        print(f"      Source: {chunk['metadata'].get('source', '?')}")
+        print(f"      Text: {chunk['text'][:120]}...")
+        print()
+
+    # Build prompt
+    prompt = build_rag_prompt(query, chunks)
+
+    print("=" * 60)
+    print("📝 FULL PROMPT TO LLM:")
+    print("=" * 60)
+    print(prompt)
+    print("=" * 60)
+
+    return prompt, chunks
+</code></pre>
+<p>이 함수를 Jupyter 노트북에서 실행하면, <strong>LLM이 보는 모든 것</strong>을 눈으로 확인할 수 있습니다. 이것이 프레임워크를 사용하지 않는 이유입니다 — 블랙박스가 없습니다.</p>
+<h2 id="검색-품질-진단"><a class="header" href="#검색-품질-진단">검색 품질 진단</a></h2>
+<h3 id="결과가-좋을-때"><a class="header" href="#결과가-좋을-때">결과가 좋을 때</a></h3>
+<pre><code>Query: "통합 메모리란?"
+[1] similarity=0.92  ████████████████████
+    "Apple Silicon은 CPU와 GPU가 같은 메모리를 공유합니다..."
+
+→ 질문과 직접적으로 관련된 내용이 높은 유사도로 반환됨 ✓
+</code></pre>
+<h3 id="결과가-나쁠-때"><a class="header" href="#결과가-나쁠-때">결과가 나쁠 때</a></h3>
+<pre><code>Query: "통합 메모리란?"
+[1] similarity=0.35  ███████
+    "Python 3.11은 CPython의 속도를 향상시켰습니다..."
+
+→ 관련 없는 내용이 반환됨 ✗
+</code></pre>
+<p><strong>원인과 해결</strong>:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>증상</th><th>가능한 원인</th><th>해결</th></tr>
+</thead>
+<tbody>
+<tr><td>관련 없는 결과</td><td>임베딩 모델이 한국어 미지원</td><td>bge-m3 확인</td></tr>
+<tr><td>유사도가 전체적으로 낮음</td><td>chunk_size가 너무 작아 맥락 부족</td><td>chunk_size 늘리기</td></tr>
+<tr><td>같은 내용이 여러 번</td><td>overlap이 너무 큼</td><td>overlap 줄이기</td></tr>
+<tr><td>필요한 정보가 안 나옴</td><td>문서에 해당 내용이 없음</td><td>문서 확인</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="실습-2"><a class="header" href="#실습-2">실습</a></h2>
+<pre><code class="language-python"># 1. Retriever 생성
+retriever = Retriever()
+
+# 2. 다양한 질문으로 검색 테스트
+queries = [
+    "MLX의 통합 메모리란 무엇인가?",
+    "ChromaDB는 왜 사용하나?",
+    "Python 가상환경은 어떻게 만드나?",
+    "내일 날씨는?",  # 문서에 없는 질문
+]
+
+for query in queries:
+    prompt, chunks = retrieve_and_show(retriever, query, top_k=3)
+    print("\n" + "─" * 60 + "\n")
+</code></pre>
+<p>마지막 질문(“내일 날씨는?”)의 결과를 주목하세요. 유사도가 매우 낮을 것입니다. 이 경우 RAG 시스템은 “문서에서 해당 정보를 찾을 수 없습니다“라고 답해야 합니다.</p>
+<h2 id="핵심-정리-6"><a class="header" href="#핵심-정리-6">핵심 정리</a></h2>
+<ol>
+<li>검색은 <strong>질문 벡터와 가장 가까운 청크 벡터를 찾는</strong> 것이다</li>
+<li><code>top_k=3</code>이 대부분의 경우 적당하다</li>
+<li>너무 많은 청크를 가져오면 <strong>Lost in the Middle</strong> 문제가 생긴다</li>
+<li>프롬프트에 <strong>역할 지정, 환각 방지, 출처 추적</strong> 규칙을 넣는다</li>
+<li><code>retrieve_and_show()</code>로 LLM에 전달되는 <strong>모든 것을 확인</strong>할 수 있다</li>
+<li>검색 결과가 나쁘면 임베딩 모델, chunk_size, 문서 자체를 점검한다</li>
+</ol>
+<hr>
+<p>이전: <a href="#07-벡터-저장소-vector-store">07. 벡터 저장소</a> | 다음: <a href="#09-rag-파이프라인-조립">09. RAG 파이프라인 조립</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="09-rag-파이프라인-조립"><a class="header" href="#09-rag-파이프라인-조립">09. RAG 파이프라인 조립</a></h1>
+<h2 id="드디어-연결할-시간"><a class="header" href="#드디어-연결할-시간">드디어 연결할 시간</a></h2>
+<p>지금까지 배운 모든 조각을 하나로 합칩니다:</p>
+<pre><code>                        전체 RAG 파이프라인
+═══════════════════════════════════════════════════════
+
+ [문서 로딩] → [청킹] → [임베딩] → [ChromaDB 저장]     ← 준비 (한 번)
+
+ [질문] → [질문 임베딩] → [검색] → [프롬프트 구성] → [LLM 생성] → [답변]
+                                                      ← 질문 (매번)
+</code></pre>
+<p>도서관 비유의 완성:</p>
+<ol>
+<li>사서가 책을 정리해두었습니다 (준비 단계 완료)</li>
+<li>학생이 질문합니다</li>
+<li>사서가 관련 페이지를 찾아줍니다</li>
+<li>학생이 그 페이지를 읽고 답변합니다</li>
+</ol>
+<h2 id="rag-파이프라인-클래스"><a class="header" href="#rag-파이프라인-클래스">RAG 파이프라인 클래스</a></h2>
+<pre><code class="language-python">from mlx_lm import load, generate
+from sentence_transformers import SentenceTransformer
+import chromadb
+import mlx.core as mx
+
+class RAGPipeline:
+    """Complete RAG pipeline: retrieve relevant chunks and generate answers.
+
+    Connects all the pieces we've built:
+    - Retriever: finds relevant document chunks
+    - Generator: produces answers using Qwen + retrieved context
+    """
+
+    def __init__(
+        self,
+        llm_model: str = "mlx-community/Qwen2.5-7B-Instruct-4bit",
+        embed_model: str = "BAAI/bge-m3",
+        db_path: str = "./chroma_db",
+        collection_name: str = "my_documents",
+    ):
+        print("Loading models...")
+
+        # Load embedding model (for query embedding)
+        print("  Loading embedding model...")
+        self.embed_model = SentenceTransformer(embed_model)
+
+        # Load LLM (for answer generation)
+        print("  Loading LLM...")
+        self.llm, self.tokenizer = load(llm_model)
+
+        # Connect to vector store
+        client = chromadb.PersistentClient(path=db_path)
+        self.collection = client.get_collection(collection_name)
+
+        print(f"  Ready! {self.collection.count()} chunks indexed")
+        print(f"  GPU memory: {mx.metal.get_active_memory() / 1e9:.1f} GB")
+
+    def retrieve(self, query: str, top_k: int = 3) -&gt; list[dict]:
+        """Find relevant chunks for a query."""
+        query_vec = self.embed_model.encode(query).tolist()
+
+        results = self.collection.query(
+            query_embeddings=[query_vec],
+            n_results=top_k,
+            include=["documents", "metadatas", "distances"],
+        )
+
+        chunks = []
+        for i in range(len(results["documents"][0])):
+            chunks.append({
+                "text": results["documents"][0][i],
+                "metadata": results["metadatas"][0][i],
+                "distance": results["distances"][0][i],
+            })
+        return chunks
+
+    def generate_answer(
+        self,
+        query: str,
+        context_chunks: list[dict],
+        max_tokens: int = 500,
+        temp: float = 0.3,
+    ) -&gt; str:
+        """Generate an answer using the LLM with retrieved context."""
+        # Build context string
+        context_parts = []
+        for chunk in context_chunks:
+            source = chunk["metadata"].get("source", "unknown")
+            idx = chunk["metadata"].get("chunk_index", "?")
+            context_parts.append(
+                f"[Source: {source}, Chunk {idx}]\n{chunk['text']}"
+            )
+        context = "\n\n---\n\n".join(context_parts)
+
+        # Build chat messages
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "You are a helpful assistant. "
+                    "Answer based ONLY on the provided documents. "
+                    "If the answer is not in the documents, say so. "
+                    "Cite sources. Answer in Korean."
+                ),
+            },
+            {
+                "role": "user",
+                "content": f"## 참고 문서\n\n{context}\n\n## 질문\n\n{query}",
+            },
+        ]
+
+        prompt = self.tokenizer.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True,
+        )
+
+        response = generate(
+            self.llm, self.tokenizer,
+            prompt=prompt,
+            max_tokens=max_tokens,
+            temp=temp,
+        )
+
+        # Clean up GPU cache (essential for stable memory)
+        mx.metal.clear_cache()
+
+        return response
+
+    def ask(self, query: str, top_k: int = 3, show_context: bool = True) -&gt; str:
+        """Complete RAG pipeline: retrieve + generate.
+
+        This is the main function users call.
+        """
+        # Step 1: Retrieve relevant chunks
+        chunks = self.retrieve(query, top_k=top_k)
+
+        # Step 2: Show what was retrieved (transparency!)
+        if show_context:
+            print(f"📚 Retrieved {len(chunks)} chunks:\n")
+            for i, chunk in enumerate(chunks):
+                similarity = 1 - chunk["distance"]
+                source = chunk["metadata"].get("source", "?")
+                print(f"  [{i+1}] {source} (similarity: {similarity:.3f})")
+                print(f"      {chunk['text'][:80]}...")
+                print()
+
+        # Step 3: Generate answer
+        answer = self.generate_answer(query, chunks)
+
+        return answer
+
+    def ask_without_rag(self, query: str, max_tokens: int = 500) -&gt; str:
+        """Ask the LLM directly without RAG (for comparison).
+
+        Same question, but the LLM uses only its training data.
+        """
+        messages = [
+            {
+                "role": "system",
+                "content": "You are a helpful assistant. Answer in Korean.",
+            },
+            {"role": "user", "content": query},
+        ]
+
+        prompt = self.tokenizer.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True,
+        )
+
+        response = generate(
+            self.llm, self.tokenizer,
+            prompt=prompt,
+            max_tokens=max_tokens,
+            temp=0.3,
+        )
+
+        mx.metal.clear_cache()
+        return response
+</code></pre>
+<h2 id="파이프라인-사용하기"><a class="header" href="#파이프라인-사용하기">파이프라인 사용하기</a></h2>
+<pre><code class="language-python"># RAG 파이프라인 생성
+rag = RAGPipeline()
+
+# RAG로 질문
+answer = rag.ask("Apple Silicon의 통합 메모리란 무엇인가요?")
+print("\n💬 Answer:")
+print(answer)
+</code></pre>
+<p>출력 예:</p>
+<pre><code>📚 Retrieved 3 chunks:
+
+  [1] mlx-guide.md (similarity: 0.921)
+      Apple Silicon은 CPU와 GPU가 같은 메모리를 공유합니다. 이를 통합 메모리...
+
+  [2] mlx-guide.md (similarity: 0.856)
+      128GB 통합 메모리를 가진 Mac Studio에서는 70B 파라미터 모델도 실행할...
+
+  [3] mlx-guide.md (similarity: 0.734)
+      MLX는 Apple이 Apple Silicon을 위해 만든 머신러닝 프레임워크입니다...
+
+💬 Answer:
+Apple Silicon의 통합 메모리(Unified Memory)란, CPU와 GPU가 같은 물리적
+메모리를 공유하는 아키텍처입니다. 일반적인 시스템에서는 CPU 메모리(RAM)와
+GPU 메모리(VRAM)가 별도로 존재하여 데이터를 복사해야 하지만, Apple Silicon
+에서는 이 복사가 필요 없습니다. 이는 특히 대규모 모델을 실행할 때 큰 이점을
+제공하며, 128GB 통합 메모리를 가진 Mac Studio에서는 70B 파라미터 모델도
+실행할 수 있습니다.
+
+(출처: mlx-guide.md)
+</code></pre>
+<h2 id="내부-동작-살펴보기"><a class="header" href="#내부-동작-살펴보기">내부 동작 살펴보기</a></h2>
+<p>파이프라인의 각 단계에서 무슨 일이 일어나는지 시각적으로 보여줍니다:</p>
+<pre><code class="language-python">def ask_verbose(rag, query):
+    """Show every step of the RAG pipeline in detail."""
+
+    print("=" * 60)
+    print(f"QUESTION: {query}")
+    print("=" * 60)
+
+    # Step 1: Retrieve
+    print("\n── Step 1: RETRIEVE ──")
+    chunks = rag.retrieve(query, top_k=3)
+    for i, c in enumerate(chunks):
+        sim = 1 - c["distance"]
+        print(f"  [{i+1}] sim={sim:.3f} | {c['metadata'].get('source','?')}")
+        print(f"      \"{c['text'][:80]}...\"")
+
+    # Step 2: Build prompt
+    print("\n── Step 2: BUILD PROMPT ──")
+    context_parts = []
+    for c in chunks:
+        source = c["metadata"].get("source", "?")
+        idx = c["metadata"].get("chunk_index", "?")
+        context_parts.append(f"[Source: {source}, Chunk {idx}]\n{c['text']}")
+    context = "\n---\n".join(context_parts)
+    print(f"  Context length: {len(context)} chars")
+    print(f"  Chunks included: {len(chunks)}")
+
+    # Step 3: Generate
+    print("\n── Step 3: GENERATE ──")
+    answer = rag.generate_answer(query, chunks)
+    print(f"  Answer length: {len(answer)} chars")
+    print(f"  GPU memory: {mx.metal.get_active_memory() / 1e9:.1f} GB")
+
+    # Result
+    print("\n── ANSWER ──")
+    print(answer)
+    print("=" * 60)
+
+    return answer
+</code></pre>
+<pre><code class="language-python">ask_verbose(rag, "MLX에서 메모리 관리는 어떻게 하나요?")
+</code></pre>
+<p>이 함수를 통해 RAG의 <strong>모든 내부 동작</strong>을 볼 수 있습니다. 블랙박스가 없습니다.</p>
+<h2 id="문서에-없는-질문-처리"><a class="header" href="#문서에-없는-질문-처리">문서에 없는 질문 처리</a></h2>
+<p>RAG는 문서에 없는 내용에 대해 “모릅니다“라고 답해야 합니다:</p>
+<pre><code class="language-python">answer = rag.ask("내일 서울 날씨는 어떤가요?")
+</code></pre>
+<pre><code>📚 Retrieved 3 chunks:
+
+  [1] mlx-guide.md (similarity: 0.123)  ← 유사도가 매우 낮음
+      ...
+
+💬 Answer:
+문서에서 날씨에 관한 정보를 찾을 수 없습니다.
+인덱싱된 문서는 MLX 프레임워크에 관한 기술 문서입니다.
+</code></pre>
+<p>이것이 RAG의 장점입니다. LLM이 자기 기억으로 지어내는 대신, “문서에 없다“고 정직하게 답합니다.</p>
+<h2 id="에러-없이-동작하는지-확인"><a class="header" href="#에러-없이-동작하는지-확인">에러 없이 동작하는지 확인</a></h2>
+<pre><code class="language-python"># 여러 질문을 연속으로 테스트
+test_queries = [
+    "MLX란 무엇인가요?",
+    "통합 메모리의 장점은?",
+    "Lazy evaluation이란?",
+    "오늘 점심 메뉴는?",  # 문서에 없는 질문
+]
+
+for query in test_queries:
+    print(f"\n{'─' * 40}")
+    answer = rag.ask(query, show_context=False)
+    print(f"Q: {query}")
+    print(f"A: {answer[:200]}...")
+
+    # 메모리 확인
+    mem = mx.metal.get_active_memory() / 1e9
+    print(f"   [Memory: {mem:.1f} GB]")
+</code></pre>
+<p>메모리가 질문마다 안정적으로 유지되는지 확인하세요. <code>clear_cache()</code>가 제대로 동작하고 있다면, 메모리가 계속 증가하지 않을 것입니다.</p>
+<h2 id="핵심-정리-7"><a class="header" href="#핵심-정리-7">핵심 정리</a></h2>
+<ol>
+<li><strong>RAGPipeline</strong>은 Retriever(검색) + Generator(생성)를 하나로 합친 것이다</li>
+<li><code>ask()</code> 하나로 전체 파이프라인이 동작한다: 검색 → 프롬프트 구성 → 생성</li>
+<li><code>show_context=True</code>로 검색 결과를 투명하게 확인할 수 있다</li>
+<li><code>ask_without_rag()</code>로 RAG 없는 답변을 별도로 얻을 수 있다 (비교용)</li>
+<li>문서에 없는 질문에 “없다“고 답하는 것이 RAG의 장점이다</li>
+<li>매 생성 후 <code>mx.metal.clear_cache()</code>로 메모리를 안정적으로 유지한다</li>
+</ol>
+<hr>
+<p>이전: <a href="#08-검색하기-retrieval">08. 검색하기</a> | 다음: <a href="#10-rag의-차이--최종-비교">10. RAG의 차이</a></p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="10-rag의-차이--최종-비교"><a class="header" href="#10-rag의-차이--최종-비교">10. RAG의 차이 — 최종 비교</a></h1>
+<h2 id="이-프로젝트의-목표"><a class="header" href="#이-프로젝트의-목표">이 프로젝트의 목표</a></h2>
+<p>이 튜토리얼 시리즈의 최종 목표입니다:</p>
+<p><strong>같은 질문을 RAG 없이 / RAG와 함께 물어보고, 답변 품질이 어떻게 달라지는지 직접 비교합니다.</strong></p>
+<h2 id="비교-방법"><a class="header" href="#비교-방법">비교 방법</a></h2>
+<p>하나의 질문에 대해 두 가지 답변을 나란히 생성합니다:</p>
+<pre><code>                     같은 질문
+                    ↙         ↘
+            RAG OFF              RAG ON
+         (LLM 기억만)          (문서 검색 후)
+              ↓                     ↓
+           답변 A                답변 B
+              ↓                     ↓
+         ┌──────────┐        ┌──────────┐
+         │ 일반적인  │        │ 정확하고  │
+         │ 답변     │        │ 근거 있는 │
+         │ (환각?)  │        │ 답변     │
+         │          │        │ (출처O)  │
+         └──────────┘        └──────────┘
+</code></pre>
+<h2 id="비교-함수"><a class="header" href="#비교-함수">비교 함수</a></h2>
+<pre><code class="language-python">def compare_rag(rag_pipeline, query: str, top_k: int = 3):
+    """Compare answers with and without RAG side by side.
+
+    This is the core educational artifact of this project.
+    Shows exactly what difference RAG makes.
+    """
+    print("=" * 70)
+    print(f"  QUESTION: {query}")
+    print("=" * 70)
+
+    # ── RAG OFF ──
+    print("\n┌─────────────────────────────────────────────────────────────┐")
+    print("│  RAG OFF — LLM의 학습 데이터만으로 답변                       │")
+    print("└─────────────────────────────────────────────────────────────┘\n")
+
+    answer_without = rag_pipeline.ask_without_rag(query)
+    print(answer_without)
+
+    # ── RAG ON ──
+    print("\n┌─────────────────────────────────────────────────────────────┐")
+    print("│  RAG ON — 문서 검색 후 답변                                  │")
+    print("└─────────────────────────────────────────────────────────────┘\n")
+
+    # Show retrieved chunks
+    chunks = rag_pipeline.retrieve(query, top_k=top_k)
+    print("📚 검색된 문서 조각:")
+    for i, chunk in enumerate(chunks):
+        similarity = 1 - chunk["distance"]
+        source = chunk["metadata"].get("source", "?")
+        idx = chunk["metadata"].get("chunk_index", "?")
+        print(f"  [{i+1}] {source} chunk {idx} (유사도: {similarity:.3f})")
+        print(f"      \"{chunk['text'][:100]}...\"\n")
+
+    answer_with = rag_pipeline.generate_answer(query, chunks)
+    print("💬 답변:")
+    print(answer_with)
+
+    # ── Summary ──
+    print("\n" + "=" * 70)
+    print("  COMPARISON SUMMARY")
+    print("=" * 70)
+    print(f"  RAG OFF: {len(answer_without)} chars")
+    print(f"  RAG ON:  {len(answer_with)} chars")
+    print(f"  Sources: {', '.join(c['metadata'].get('source','?') for c in chunks)}")
+    print("=" * 70)
+
+    return {
+        "query": query,
+        "answer_without_rag": answer_without,
+        "answer_with_rag": answer_with,
+        "chunks": chunks,
+    }
+</code></pre>
+<h2 id="비교-실험"><a class="header" href="#비교-실험">비교 실험</a></h2>
+<h3 id="실험-1-문서에-있는-내용"><a class="header" href="#실험-1-문서에-있는-내용">실험 1: 문서에 있는 내용</a></h3>
+<p>문서에 명확히 적혀 있는 내용을 물어봅니다.</p>
+<pre><code class="language-python">rag = RAGPipeline()
+
+compare_rag(rag, "Apple Silicon의 통합 메모리란 무엇이고 왜 중요한가요?")
+</code></pre>
+<p><strong>기대 결과:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th>RAG OFF</th><th>RAG ON</th></tr>
+</thead>
+<tbody>
+<tr><td>정확성</td><td>일반적인 설명 (대체로 맞지만 구체성 부족)</td><td>문서의 구체적 내용 인용</td></tr>
+<tr><td>출처</td><td>없음</td><td>“mlx-guide.md에 따르면…”</td></tr>
+<tr><td>환각 위험</td><td>있음 (세부 사항을 지어낼 수 있음)</td><td>낮음 (문서 내용 기반)</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="실험-2-llm이-모르는-내용"><a class="header" href="#실험-2-llm이-모르는-내용">실험 2: LLM이 모르는 내용</a></h3>
+<p>LLM의 학습 데이터에 없을 가능성이 높은 내용을 물어봅니다.</p>
+<pre><code class="language-python">compare_rag(rag, "우리 팀의 코드 리뷰 규칙은 어떻게 되나요?")
+</code></pre>
+<p>이 실험을 위해서는 팀 규칙 문서를 미리 인덱싱해 두어야 합니다.</p>
+<p><strong>기대 결과:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th>RAG OFF</th><th>RAG ON</th></tr>
+</thead>
+<tbody>
+<tr><td>답변</td><td>일반적인 코드 리뷰 모범 사례</td><td>실제 팀 규칙</td></tr>
+<tr><td>정확성</td><td>우리 팀 규칙과 다름</td><td>문서와 일치</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="실험-3-문서에-없는-내용"><a class="header" href="#실험-3-문서에-없는-내용">실험 3: 문서에 없는 내용</a></h3>
+<p>인덱싱된 문서에 전혀 없는 내용을 물어봅니다.</p>
+<pre><code class="language-python">compare_rag(rag, "내일 서울의 날씨는 어떤가요?")
+</code></pre>
+<p><strong>기대 결과:</strong></p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th></th><th>RAG OFF</th><th>RAG ON</th></tr>
+</thead>
+<tbody>
+<tr><td>답변</td><td>“일반적으로 서울의 날씨는…” (지어냄)</td><td>“문서에서 해당 정보를 찾을 수 없습니다”</td></tr>
+</tbody>
+</table>
+</div>
+<p>RAG ON이 “모른다“고 정직하게 답하는 것이 오히려 좋은 결과입니다!</p>
+<h3 id="실험-4-여러-질문-연속-비교"><a class="header" href="#실험-4-여러-질문-연속-비교">실험 4: 여러 질문 연속 비교</a></h3>
+<pre><code class="language-python">queries = [
+    "MLX에서 lazy evaluation이란?",
+    "벡터 데이터베이스의 역할은?",
+    "128GB Mac에서 어떤 크기의 모델을 실행할 수 있나요?",
+]
+
+results = []
+for query in queries:
+    result = compare_rag(rag, query)
+    results.append(result)
+    print("\n" + "━" * 70 + "\n")
+</code></pre>
+<h2 id="비교-결과-분석-가이드"><a class="header" href="#비교-결과-분석-가이드">비교 결과 분석 가이드</a></h2>
+<p>각 비교 결과를 보면서 다음을 확인하세요:</p>
+<h3 id="1-정확성-accuracy"><a class="header" href="#1-정확성-accuracy">1. 정확성 (Accuracy)</a></h3>
+<pre><code>RAG OFF: "MLX는 PyTorch와 유사한 API를 제공합니다" ← 일반론 (맞을 수도 틀릴 수도)
+RAG ON:  "MLX는 NumPy와 유사한 API를 제공합니다"  ← 문서에 있는 정확한 내용
+</code></pre>
+<h3 id="2-구체성-specificity"><a class="header" href="#2-구체성-specificity">2. 구체성 (Specificity)</a></h3>
+<pre><code>RAG OFF: "대규모 모델을 실행할 수 있습니다"        ← 막연함
+RAG ON:  "128GB 메모리로 70B 모델을 실행할 수 있습니다" ← 구체적 수치
+</code></pre>
+<h3 id="3-출처-source-citation"><a class="header" href="#3-출처-source-citation">3. 출처 (Source Citation)</a></h3>
+<pre><code>RAG OFF: (출처 없음)                              ← 어디서 온 정보인지 모름
+RAG ON:  (출처: mlx-guide.md, chunk 3)           ← 확인 가능
+</code></pre>
+<h3 id="4-환각-hallucination"><a class="header" href="#4-환각-hallucination">4. 환각 (Hallucination)</a></h3>
+<pre><code>RAG OFF: "MLX는 2023년 12월에 처음 공개되었습니다" ← 진짜인지 확인 불가
+RAG ON:  문서에 출시일 정보가 없으면 언급하지 않음   ← 안전
+</code></pre>
+<h2 id="메모리-안정성-확인"><a class="header" href="#메모리-안정성-확인">메모리 안정성 확인</a></h2>
+<p>비교 실험을 연속으로 실행한 후 메모리가 안정적인지 확인합니다:</p>
+<pre><code class="language-python">import mlx.core as mx
+
+print(f"After all comparisons:")
+print(f"  Active memory: {mx.metal.get_active_memory() / 1e9:.1f} GB")
+print(f"  Peak memory:   {mx.metal.get_peak_memory() / 1e9:.1f} GB")
+</code></pre>
+<p>메모리가 계속 증가하지 않고 안정적으로 유지되어야 합니다.</p>
+<h2 id="정리-rag가-만드는-차이"><a class="header" href="#정리-rag가-만드는-차이">정리: RAG가 만드는 차이</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>측면</th><th>RAG 없이</th><th>RAG와 함께</th></tr>
+</thead>
+<tbody>
+<tr><td>일반 지식</td><td>✓ 잘 답변</td><td>✓ 잘 답변 (+ 문서 근거)</td></tr>
+<tr><td>내 문서 내용</td><td>✗ 모름 / 지어냄</td><td>✓ 정확히 답변</td></tr>
+<tr><td>최신 정보</td><td>✗ 학습 시점까지만</td><td>✓ 최신 문서 있으면 가능</td></tr>
+<tr><td>환각</td><td>✗ 그럴듯하게 지어냄</td><td>✓ 문서 기반, 없으면 “모름”</td></tr>
+<tr><td>출처</td><td>✗ 확인 불가</td><td>✓ 어떤 문서의 어디에서 왔는지</td></tr>
+<tr><td>신뢰도</td><td>낮음</td><td>높음</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="더-나아가기"><a class="header" href="#더-나아가기">더 나아가기</a></h2>
+<p>이 튜토리얼에서 배운 기본 RAG를 개선할 수 있는 방향들:</p>
+<h3 id="청킹-전략-비교"><a class="header" href="#청킹-전략-비교">청킹 전략 비교</a></h3>
+<ul>
+<li>고정 크기 vs 재귀 분할 vs 의미 기반 청킹</li>
+<li>같은 질문에 어떤 청킹이 더 좋은 결과를 내는지 비교</li>
+</ul>
+<h3 id="하이브리드-검색"><a class="header" href="#하이브리드-검색">하이브리드 검색</a></h3>
+<ul>
+<li>벡터 검색 + 키워드 검색(BM25) 결합</li>
+<li>고유명사, 코드명 등 키워드가 중요한 경우에 유리</li>
+</ul>
+<h3 id="검색-실패-분석"><a class="header" href="#검색-실패-분석">검색 실패 분석</a></h3>
+<ul>
+<li>어떤 질문에서 검색이 실패하는지 패턴 찾기</li>
+<li>chunk_size, top_k 파라미터 최적화</li>
+</ul>
+<h3 id="평가-지표"><a class="header" href="#평가-지표">평가 지표</a></h3>
+<ul>
+<li>답변의 정확성을 수치화 (RAGAS 프레임워크 등)</li>
+<li>“잘 만든 RAG“와 “못 만든 RAG“의 차이를 정량적으로 측정</li>
+</ul>
+<h2 id="축하합니다"><a class="header" href="#축하합니다">축하합니다!</a></h2>
+<p>RAG의 모든 단계를 직접 구현하고, RAG가 만드는 차이를 눈으로 확인했습니다.</p>
+<pre><code>00. RAG란? ✓             → 개념 이해
+01. 전체 그림 ✓          → 파이프라인 구조
+02. 환경 설정 ✓          → 도구 준비
+03. LLM 만나기 ✓         → LLM의 능력과 한계
+04. 문서 로딩 ✓          → 파일 → 텍스트
+05. 청킹 ✓              → 텍스트 → 조각
+06. 임베딩 ✓             → 조각 → 벡터
+07. 벡터 저장소 ✓        → 벡터 → ChromaDB
+08. 검색 ✓              → 질문 → 관련 조각 찾기
+09. 파이프라인 ✓         → 전체 연결
+10. RAG 비교 ✓           → RAG on/off 차이 확인 ← 지금 여기!
+</code></pre>
+<p>핵심을 한 문장으로:</p>
+<p><strong>RAG는 LLM에게 “참고 자료를 건네주는 것“이고, 이것만으로 답변의 정확성, 구체성, 신뢰도가 극적으로 향상됩니다.</strong></p>
+<hr>
+<p>이전: <a href="#09-rag-파이프라인-조립">09. RAG 파이프라인 조립</a></p>
+<hr>
+<h2 id="전체-튜토리얼-목록"><a class="header" href="#전체-튜토리얼-목록">전체 튜토리얼 목록</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>#</th><th>제목</th><th>배우는 것</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="#00-rag란-무엇인가">00</a></td><td>RAG란 무엇인가?</td><td>RAG 개념, 왜 필요한가</td></tr>
+<tr><td><a href="#01-rag의-전체-그림">01</a></td><td>RAG의 전체 그림</td><td>두 파이프라인, 각 단계</td></tr>
+<tr><td><a href="#02-환경-설정">02</a></td><td>환경 설정</td><td>Python, MLX, 모델 설치</td></tr>
+<tr><td><a href="#03-llm-만나기">03</a></td><td>LLM 만나기</td><td>Qwen 모델, LLM 한계 체험</td></tr>
+<tr><td><a href="#04-문서-준비와-로딩">04</a></td><td>문서 준비</td><td>MD, PDF, TXT 파싱</td></tr>
+<tr><td><a href="#05-텍스트-자르기-chunking">05</a></td><td>텍스트 자르기</td><td>청킹, 오버랩, 파라미터</td></tr>
+<tr><td><a href="#06-의미를-숫자로-embedding">06</a></td><td>의미를 숫자로</td><td>벡터, 코사인 유사도</td></tr>
+<tr><td><a href="#07-벡터-저장소-vector-store">07</a></td><td>벡터 저장소</td><td>ChromaDB 사용법</td></tr>
+<tr><td><a href="#08-검색하기-retrieval">08</a></td><td>검색하기</td><td>유사도 검색, 프롬프트 구성</td></tr>
+<tr><td><a href="#09-rag-파이프라인-조립">09</a></td><td>파이프라인 조립</td><td>전체 RAG 연결</td></tr>
+<tr><td><a href="#10-rag의-차이--최종-비교">10</a></td><td>RAG의 차이</td><td>RAG on/off 비교</td></tr>
+</tbody>
+</table>
+</div>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-c2a407aa.js"></script>
+
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-abc7f01d.js"></script>
+        <script src="book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+
+    </div>
+    </body>
+</html>

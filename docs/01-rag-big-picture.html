@@ -1,0 +1,410 @@
+<!DOCTYPE HTML>
+<html lang="ko" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>01. RAG의 전체 그림 - RAG Tutorial</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Mac Studio에서 Qwen3.5 MLX로 배우는 로컬 RAG 튜토리얼">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="favicon-8114d1fc.png">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-2459343d.css">
+        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex-b722dc80.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc-f39401bd.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">RAG Tutorial</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="01-rag의-전체-그림"><a class="header" href="#01-rag의-전체-그림">01. RAG의 전체 그림</a></h1>
+<h2 id="두-개의-파이프라인"><a class="header" href="#두-개의-파이프라인">두 개의 파이프라인</a></h2>
+<p>RAG는 크게 두 단계로 나뉩니다. <strong>준비 단계</strong>와 <strong>질문 단계</strong>입니다.</p>
+<p>다시 도서관 비유로 설명하면:</p>
+<ol>
+<li><strong>준비 단계 (Ingestion)</strong> = 사서가 책을 분류하고 서가에 정리하는 과정</li>
+<li><strong>질문 단계 (Query)</strong> = 학생이 질문하면 사서가 관련 책을 찾아주는 과정</li>
+</ol>
+<p>준비 단계는 <strong>한 번만</strong> 하면 됩니다. 새 책(문서)이 추가될 때만 다시 합니다.
+질문 단계는 <strong>매 질문마다</strong> 반복됩니다.</p>
+<h2 id="준비-단계-ingestion-pipeline"><a class="header" href="#준비-단계-ingestion-pipeline">준비 단계 (Ingestion Pipeline)</a></h2>
+<p>문서를 검색 가능한 형태로 변환하는 과정입니다.</p>
+<pre><code> ① 로딩        ② 청킹          ③ 임베딩         ④ 저장
+┌──────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+│ 문서  │ →  │ 텍스트    │ →  │ 텍스트    │ →  │ 숫자 벡터 │ →  벡터 DB
+│ 파일  │    │ 추출     │    │ 조각들    │    │ 변환     │    (ChromaDB)
+│.md    │    │          │    │          │    │          │
+│.pdf   │    │ "안녕    │    │ [조각1]  │    │ [0.1,    │
+│.txt   │    │  하세요  │    │ [조각2]  │    │  0.3,    │
+│       │    │  ..."    │    │ [조각3]  │    │  ...]    │
+└──────┘    └──────────┘    └──────────┘    └──────────┘
+</code></pre>
+<p>각 단계를 하나씩 살펴봅시다:</p>
+<h3 id="①-로딩-document-loading"><a class="header" href="#①-로딩-document-loading">① 로딩 (Document Loading)</a></h3>
+<p>파일을 열어서 텍스트를 추출합니다.</p>
+<ul>
+<li><code>.txt</code> 파일 → 그대로 읽기</li>
+<li><code>.md</code> 파일 → 마크다운 문법과 함께 읽기</li>
+<li><code>.pdf</code> 파일 → PDF 레이아웃을 텍스트로 변환 (가장 복잡)</li>
+</ul>
+<p><strong>비유</strong>: 도서관에 새 책이 들어왔습니다. 사서가 포장을 뜯고 책을 펼칩니다.</p>
+<h3 id="②-청킹-chunking"><a class="header" href="#②-청킹-chunking">② 청킹 (Chunking)</a></h3>
+<p>긴 텍스트를 적당한 크기의 **조각(chunk)**으로 나눕니다.</p>
+<p>왜 나누는가?</p>
+<ul>
+<li>책 한 권을 통째로 학생에게 주면 읽는 데 오래 걸립니다</li>
+<li>필요한 <strong>페이지만</strong> 펼쳐주는 것이 훨씬 효율적입니다</li>
+<li>LLM도 한 번에 처리할 수 있는 텍스트 양에 한계가 있습니다</li>
+</ul>
+<pre><code>원본 문서 (3000자):
+"RAG는 검색 증강 생성입니다. LLM이 답변을 생성할 때...
+ ...임베딩은 텍스트를 벡터로 변환합니다...
+ ...ChromaDB는 벡터를 저장합니다..."
+
+         ↓ 500자씩 나누기
+
+조각 1 (500자): "RAG는 검색 증강 생성입니다. LLM이..."
+조각 2 (500자): "...임베딩은 텍스트를 벡터로 변환..."
+조각 3 (500자): "...ChromaDB는 벡터를 저장합니다..."
+</code></pre>
+<p><strong>비유</strong>: 사서가 책의 각 장(chapter)을 색인 카드에 요약해 둡니다. 나중에 관련 장만 빠르게 찾을 수 있도록.</p>
+<h3 id="③-임베딩-embedding"><a class="header" href="#③-임베딩-embedding">③ 임베딩 (Embedding)</a></h3>
+<p>텍스트 조각을 <strong>숫자 벡터</strong>로 변환합니다. 이것이 RAG에서 가장 핵심적인 개념입니다.</p>
+<p>벡터란 무엇인가? 쉽게 말하면 <strong>텍스트의 의미를 숫자로 표현한 것</strong>입니다.</p>
+<pre><code>"고양이가 소파에 앉아 있다" → [0.82, -0.15, 0.43, ..., 0.67]
+"강아지가 침대에 누워 있다" → [0.79, -0.18, 0.41, ..., 0.64]  ← 비슷한 숫자!
+"오늘 주식 시장이 폭락했다" → [-0.23, 0.91, -0.56, ..., 0.12] ← 완전 다른 숫자
+</code></pre>
+<p>의미가 비슷한 텍스트는 비슷한 벡터를 가집니다. 이 성질 덕분에 “의미로 검색“이 가능합니다.</p>
+<p><strong>비유</strong>: 사서가 각 색인 카드에 “이 장의 내용을 좌표로 표현하면 (X, Y, Z)입니다“라고 적어둡니다. 비슷한 내용의 카드는 비슷한 좌표를 가집니다.</p>
+<h3 id="④-저장-vector-store"><a class="header" href="#④-저장-vector-store">④ 저장 (Vector Store)</a></h3>
+<p>벡터를 데이터베이스에 저장합니다. 나중에 질문이 들어오면 빠르게 비슷한 벡터를 찾을 수 있도록 합니다.</p>
+<p>이 프로젝트에서는 <strong>ChromaDB</strong>를 사용합니다. 설치만 하면 바로 쓸 수 있는 가벼운 벡터 데이터베이스입니다.</p>
+<p><strong>비유</strong>: 사서가 색인 카드를 서가에 정리해 둡니다. 좌표가 비슷한 카드끼리 가까운 서랍에 넣습니다.</p>
+<h2 id="질문-단계-query-pipeline"><a class="header" href="#질문-단계-query-pipeline">질문 단계 (Query Pipeline)</a></h2>
+<p>사용자가 질문하면 관련 문서를 찾아서 답변을 생성하는 과정입니다.</p>
+<pre><code>                    ⑤ 질문           ⑥ 검색          ⑦ 프롬프트        ⑧ 생성
+                    임베딩                           구성
+                 ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
+ 사용자 질문  →   │ 질문을    │ →  │ 비슷한   │ →  │ 질문 +   │ →  │ LLM이    │ → 답변
+ "MLX란?"       │ 벡터로    │    │ 벡터 찾기 │    │ 관련 문서 │    │ 답변     │   (출처
+                │ 변환     │    │ (벡터 DB) │    │ 합치기   │    │ 생성     │   포함)
+                └──────────┘    └──────────┘    └──────────┘    └──────────┘
+</code></pre>
+<h3 id="⑤-질문-임베딩"><a class="header" href="#⑤-질문-임베딩">⑤ 질문 임베딩</a></h3>
+<p>사용자의 질문도 같은 방법으로 벡터로 변환합니다.</p>
+<pre><code>"MLX의 장점은 무엇인가?" → [0.45, -0.12, 0.78, ..., 0.33]
+</code></pre>
+<p><strong>중요</strong>: 문서를 임베딩할 때 쓴 것과 <strong>같은 모델</strong>로 질문을 임베딩해야 합니다. 다른 모델을 쓰면 벡터 공간이 달라서 검색이 안 됩니다.</p>
+<h3 id="⑥-유사도-검색-retrieval"><a class="header" href="#⑥-유사도-검색-retrieval">⑥ 유사도 검색 (Retrieval)</a></h3>
+<p>질문 벡터와 가장 비슷한 문서 조각 벡터를 찾습니다.</p>
+<pre><code>질문 벡터: [0.45, -0.12, 0.78, ...]
+
+저장된 벡터들:
+  조각 1: [0.44, -0.11, 0.77, ...] → 유사도 0.98 ★ 가장 비슷!
+  조각 2: [0.43, -0.13, 0.76, ...] → 유사도 0.95 ★ 두 번째
+  조각 3: [-0.23, 0.91, -0.56, ...] → 유사도 0.12   관련 없음
+  ...
+
+→ 상위 3개 반환: [조각 1, 조각 2, ...]
+</code></pre>
+<p><strong>비유</strong>: 학생이 “MLX의 장점은?“이라고 물었습니다. 사서가 서가에서 비슷한 좌표의 카드를 찾아 관련 페이지를 꺼내줍니다.</p>
+<h3 id="⑦-프롬프트-구성-prompt-building"><a class="header" href="#⑦-프롬프트-구성-prompt-building">⑦ 프롬프트 구성 (Prompt Building)</a></h3>
+<p>검색된 문서 조각과 질문을 합쳐서 LLM에게 보낼 프롬프트를 만듭니다.</p>
+<pre><code>┌─────────────────────────────────────────────┐
+│ 다음 문서를 참고하여 질문에 답변하세요.         │
+│                                             │
+│ [참고 문서]                                  │
+│ "MLX는 Apple이 만든 ML 프레임워크로,          │
+│  통합 메모리를 활용하여..."                    │
+│                                             │
+│ "Apple Silicon의 통합 메모리 덕분에            │
+│  CPU와 GPU가 같은 메모리를..."                │
+│                                             │
+│ [질문]                                      │
+│ MLX의 장점은 무엇인가?                        │
+│                                             │
+│ [답변]                                      │
+└─────────────────────────────────────────────┘
+</code></pre>
+<p>이것이 RAG의 핵심입니다. LLM에게 **“이 문서를 읽고 답변해”**라고 하는 것이죠.</p>
+<h3 id="⑧-생성-generation"><a class="header" href="#⑧-생성-generation">⑧ 생성 (Generation)</a></h3>
+<p>LLM이 주어진 문서와 질문을 읽고 답변을 만듭니다.</p>
+<pre><code>LLM 답변:
+"MLX의 주요 장점은 다음과 같습니다:
+ 1. Apple Silicon의 통합 메모리를 활용하여 데이터 복사 없이 CPU와 GPU가
+    같은 메모리에 접근할 수 있습니다.
+ 2. ...
+
+ (출처: mlx-guide.md, 조각 3)"
+</code></pre>
+<h2 id="전체-흐름-한눈에"><a class="header" href="#전체-흐름-한눈에">전체 흐름 한눈에</a></h2>
+<pre><code>═══════════════════════════════════════════════════
+ 준비 단계 (한 번만 실행)
+═══════════════════════════════════════════════════
+
+    내 문서들                    벡터 DB
+  ┌────────┐                  ┌────────┐
+  │guide.md│ → 로딩 → 청킹 → │        │
+  │paper.pdf│   임베딩 →     │ChromaDB│
+  │notes.txt│                │        │
+  └────────┘                  └────────┘
+
+═══════════════════════════════════════════════════
+ 질문 단계 (매번 실행)
+═══════════════════════════════════════════════════
+
+  사용자 질문                 벡터 DB        LLM (Qwen)
+  "MLX란?"  → 임베딩 → 검색 → 관련 조각 → 프롬프트 → 답변
+                      ↑                  구성
+                      │
+                 같은 벡터 공간에서 비교
+</code></pre>
+<h2 id="각-단계를-배우는-순서"><a class="header" href="#각-단계를-배우는-순서">각 단계를 배우는 순서</a></h2>
+<p>이 튜토리얼은 위 파이프라인의 각 단계를 하나씩 구현해나갑니다:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>튜토리얼</th><th>배우는 단계</th><th>비유</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="02-environment-setup.html">02. 환경 설정</a></td><td>도구 준비</td><td>도서관 건물 짓기</td></tr>
+<tr><td><a href="03-meet-your-llm.html">03. LLM 만나기</a></td><td>⑧ 생성</td><td>학생 만나기</td></tr>
+<tr><td><a href="04-document-loading.html">04. 문서 준비</a></td><td>① 로딩</td><td>책 입고</td></tr>
+<tr><td><a href="05-chunking.html">05. 텍스트 자르기</a></td><td>② 청킹</td><td>색인 카드 만들기</td></tr>
+<tr><td><a href="06-embedding.html">06. 의미를 숫자로</a></td><td>③ 임베딩</td><td>좌표 매기기</td></tr>
+<tr><td><a href="07-vector-store.html">07. 벡터 저장소</a></td><td>④ 저장</td><td>서가에 정리</td></tr>
+<tr><td><a href="08-retrieval.html">08. 검색하기</a></td><td>⑤⑥ 검색</td><td>사서가 찾아주기</td></tr>
+<tr><td><a href="09-rag-pipeline.html">09. 파이프라인 조립</a></td><td>⑦ 프롬프트 구성</td><td>전체 연결</td></tr>
+<tr><td><a href="10-rag-comparison.html">10. RAG의 차이</a></td><td>최종 비교</td><td>시험 결과 비교</td></tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p><strong>팁</strong>: 먼저 LLM을 만나봅니다(03). LLM이 뭘 잘하고 뭘 못하는지 체감한 후에, 나머지 단계의 “왜“가 자연스럽게 이해됩니다.</p>
+</blockquote>
+<h2 id="핵심-정리"><a class="header" href="#핵심-정리">핵심 정리</a></h2>
+<ol>
+<li>RAG는 <strong>검색 + 생성</strong>입니다</li>
+<li><strong>준비 단계</strong>: 문서 → 조각으로 나누기 → 벡터로 변환 → 저장</li>
+<li><strong>질문 단계</strong>: 질문 → 관련 조각 검색 → 질문 + 조각을 LLM에 전달 → 답변</li>
+<li>모든 것이 <strong>내 컴퓨터에서 로컬로</strong> 동작합니다</li>
+<li>프레임워크 없이 각 단계를 직접 만들면, RAG가 어떻게 작동하는지 완전히 이해할 수 있습니다</li>
+</ol>
+<hr>
+<p>이전: <a href="00-what-is-rag.html">00. RAG란 무엇인가</a> | 다음: <a href="02-environment-setup.html">02. 환경 설정</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="00-what-is-rag.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="02-environment-setup.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="00-what-is-rag.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="02-environment-setup.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-c2a407aa.js"></script>
+
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-abc7f01d.js"></script>
+        <script src="book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+
+    </div>
+    </body>
+</html>
