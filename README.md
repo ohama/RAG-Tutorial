@@ -2,7 +2,7 @@
 
 ## Documentation
 
-[RAG Tutorial](docs/index.html)
+[RAG Tutorial](https://ohama.github.io/RAG-Tutorial/)
 
 Mac Studio M4 Max (128GB)에서 Qwen3.5 MLX 모델을 사용한 로컬 RAG(Retrieval-Augmented Generation) 학습 프로젝트.
 
